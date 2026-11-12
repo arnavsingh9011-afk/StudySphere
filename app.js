@@ -354,9 +354,22 @@ function renderExamList() {
     const actions = document.createElement("div");
     actions.className = "exam-actions";
 
-    const edit = document.createElement("button");
-    edit.className = "secondary-btn";
-    edit.textContent = "Edit";
+   
+const select = document.createElement("button");
+select.className = "secondary-btn";
+select.textContent =
+  selectedExamId === exam.id ? "Selected ✓" : "Select";
+select.type = "button";
+
+select.addEventListener("click", () => {
+  selectedExamId = exam.id;
+  renderExamCountdown();
+});
+
+const edit = document.createElement("button");
+edit.className = "secondary-btn";
+edit.textContent = "Edit";
+
     edit.type = "button";
     edit.addEventListener("click", () => editExam(exam.id));
 
