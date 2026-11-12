@@ -379,7 +379,7 @@ edit.textContent = "Edit";
     remove.type = "button";
     remove.addEventListener("click", () => deleteExam(exam.id));
 
-    actions.append(edit, remove);
+    actions.append(select, edit, remove);
     card.append(details, actions);
     list.append(card);
   });
