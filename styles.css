@@ -394,3 +394,7 @@ h1,h2,h3 {
     transform: translateX(0);
   }
 }
+.sidebar {
+  background: red !important;
+  border: 5px solid yellow !important;
+}
