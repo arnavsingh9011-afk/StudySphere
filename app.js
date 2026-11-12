@@ -689,7 +689,7 @@ function renderCards() {
   $("deleteCard").disabled = false;
 }
 
-function flip() {
+function flip() 
   if (!data.cards.length) return;
 
   flipped = !flipped;
