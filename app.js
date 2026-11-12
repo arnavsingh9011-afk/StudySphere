@@ -459,22 +459,229 @@ $("prevCard").addEventListener("click",()=>{if(!data.cards.length)return;cardInd
 $("nextCard").addEventListener("click",()=>{if(!data.cards.length)return;cardIndex=(cardIndex+1)%data.cards.length;flipped=false;renderCards();});
 $("deleteCard").addEventListener("click",()=>{if(!data.cards.length)return;data.cards.splice(cardIndex,1);cardIndex=Math.max(0,cardIndex-1);flipped=false;save();renderCards();toast("Flashcard deleted.");});renderCards();
 
-// Daily quiz (rotates question order by date)
-const questionBank=[
- {q:"Which planet is known as the Red Planet?",o:["Venus","Mars","Jupiter","Mercury"],a:1,e:"Mars looks reddish because iron minerals in its soil have oxidised."},
- {q:"What is the chemical symbol for gold?",o:["Ag","Gd","Au","Go"],a:2,e:"Au comes from the Latin word aurum."},
- {q:"Which part of a plant mainly absorbs water from soil?",o:["Leaves","Flower","Root hairs","Stem"],a:2,e:"Root hairs provide a large surface area for water absorption."},
- {q:"What is the largest ocean on Earth?",o:["Atlantic","Indian","Arctic","Pacific"],a:3,e:"The Pacific Ocean is the largest and deepest ocean."},
- {q:"How many sides does a hexagon have?",o:["Five","Six","Seven","Eight"],a:1,e:"A hexagon is a polygon with six sides."},
- {q:"Which gas do plants absorb during photosynthesis?",o:["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"],a:2,e:"Plants use carbon dioxide and water to make glucose during photosynthesis."},
- {q:"What is the square root of 144?",o:["10","11","12","14"],a:2,e:"12 × 12 = 144."},
- {q:"Which is the closest star to Earth?",o:["Sirius","The Sun","Proxima Centauri","Polaris"],a:1,e:"The Sun is our nearest star."},
- {q:"What is the SI unit of electric current?",o:["Volt","Ohm","Watt","Ampere"],a:3,e:"Electric current is measured in amperes (A)."},
- {q:"Which continent has the most countries?",o:["Asia","Europe","Africa","South America"],a:2,e:"Africa has the highest number of sovereign countries."}
+
+// AI-POWERED QUIZ + DAILY QUIZ
+
+const AI_QUIZ_URL =
+  "https://studysphere-ai.arnavsingh9011.workers.dev";
+
+const questionBank = [
+  {q:"Which planet is known as the Red Planet?",o:["Venus","Mars","Jupiter","Mercury"],a:1,e:"Mars looks reddish because iron minerals in its soil have oxidised."},
+  {q:"What is the chemical symbol for gold?",o:["Ag","Gd","Au","Go"],a:2,e:"Au comes from the Latin word aurum."},
+  {q:"Which part of a plant mainly absorbs water from soil?",o:["Leaves","Flower","Root hairs","Stem"],a:2,e:"Root hairs provide a large surface area for water absorption."},
+  {q:"What is the largest ocean on Earth?",o:["Atlantic","Indian","Arctic","Pacific"],a:3,e:"The Pacific Ocean is the largest and deepest ocean."},
+  {q:"How many sides does a hexagon have?",o:["Five","Six","Seven","Eight"],a:1,e:"A hexagon has six sides."},
+  {q:"Which gas do plants absorb during photosynthesis?",o:["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"],a:2,e:"Plants use carbon dioxide and water to make glucose."},
+  {q:"What is the square root of 144?",o:["10","11","12","14"],a:2,e:"12 × 12 = 144."},
+  {q:"Which is the closest star to Earth?",o:["Sirius","The Sun","Proxima Centauri","Polaris"],a:1,e:"The Sun is our nearest star."},
+  {q:"What is the SI unit of electric current?",o:["Volt","Ohm","Watt","Ampere"],a:3,e:"Electric current is measured in amperes (A)."},
+  {q:"Which continent has the most countries?",o:["Asia","Europe","Africa","South America"],a:2,e:"Africa has the highest number of sovereign countries."}
 ];
-let quizQuestions=[],quizIndex=0,quizScore=0,quizAnswered=false;
-function initQuiz(){const day=Math.floor(Date.now()/86400000);quizQuestions=Array.from({length:5},(_,i)=>questionBank[(day*3+i*2)%questionBank.length]);quizIndex=0;quizScore=0;quizAnswered=false;renderQuiz();}
-function renderQuiz(){const q=quizQuestions[quizIndex];$("quizProgress").textContent=`QUESTION ${quizIndex+1} OF ${quizQuestions.length}`;$("quizProgressBar").style.width=`${(quizIndex+1)/quizQuestions.length*100}%`;$("quizQuestion").textContent=q.q;$("quizOptions").innerHTML="";q.o.forEach((opt,i)=>{const b=document.createElement("button");b.className="quiz-option";b.textContent=String.fromCharCode(65+i)+".  "+opt;b.addEventListener("click",()=>answerQuiz(i));$("quizOptions").append(b);});$("quizFeedback").textContent="";$("quizScore").textContent=`Score: ${quizScore}`;$("quizNext").disabled=true;$("quizNext").textContent=quizIndex===quizQuestions.length-1?"Finish quiz":"Next question →";quizAnswered=false;}
-function answerQuiz(i){if(quizAnswered)return;quizAnswered=true;const q=quizQuestions[quizIndex];[...$("quizOptions").children].forEach((b,j)=>{b.disabled=true;if(j===q.a)b.classList.add("correct");if(j===i&&i!==q.a)b.classList.add("wrong");});if(i===q.a){quizScore++;$("quizFeedback").textContent="Correct! "+q.e;}else $("quizFeedback").textContent="Not quite. "+q.e;$("quizScore").textContent=`Score: ${quizScore}`;$("quizNext").disabled=false;}
-$("quizNext").addEventListener("click",()=>{if(!quizAnswered)return;if(quizIndex<quizQuestions.length-1){quizIndex++;renderQuiz();}else{$("quizQuestion").textContent=`You scored ${quizScore} out of ${quizQuestions.length}!`;$("quizOptions").innerHTML="";$("quizFeedback").textContent=quizScore===5?"Perfect score. Excellent work!":"Nice effort. Come back tomorrow for another challenge.";$("quizNext").textContent="Play again";$("quizNext").disabled=false;$("quizNext").onclick=()=>{initQuiz();$("quizNext").onclick=null;};data.quizDone=true;save();updateStreak();}});
-initQuiz();
+
+let quizQuestions = [];
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let quizFinished = false;
+
+function renderQuiz() {
+  if (quizFinished) return;
+
+  const q = quizQuestions[quizIndex];
+
+  $("quizProgress").textContent =
+    `QUESTION ${quizIndex + 1} OF ${quizQuestions.length}`;
+
+  $("quizProgressBar").style.width =
+    `${(quizIndex + 1) / quizQuestions.length * 100}%`;
+
+  $("quizQuestion").textContent = q.q;
+  $("quizOptions").innerHTML = "";
+
+  q.o.forEach((option, index) => {
+    const button = document.createElement("button");
+    button.className = "quiz-option";
+    button.textContent =
+      String.fromCharCode(65 + index) + ". " + option;
+
+    button.addEventListener("click", () => answerQuiz(index));
+    $("quizOptions").append(button);
+  });
+
+  $("quizFeedback").textContent = "";
+  $("quizScore").textContent = `Score: ${quizScore}`;
+  $("quizNext").disabled = true;
+  $("quizNext").textContent =
+    quizIndex === quizQuestions.length - 1
+      ? "Finish quiz"
+      : "Next question →";
+
+  quizAnswered = false;
+}
+
+function answerQuiz(index) {
+  if (quizAnswered || quizFinished) return;
+
+  quizAnswered = true;
+
+  const q = quizQuestions[quizIndex];
+
+  [...$("quizOptions").children].forEach((button, i) => {
+    button.disabled = true;
+
+    if (i === q.a) button.classList.add("correct");
+    if (i === index && index !== q.a) {
+      button.classList.add("wrong");
+    }
+  });
+
+  if (index === q.a) {
+    quizScore++;
+    $("quizFeedback").textContent = "Correct! " + q.e;
+  } else {
+    $("quizFeedback").textContent = "Not quite. " + q.e;
+  }
+
+  $("quizScore").textContent = `Score: ${quizScore}`;
+  $("quizNext").disabled = false;
+}
+
+function finishQuiz() {
+  quizFinished = true;
+
+  $("quizProgress").textContent = "COMPLETED";
+  $("quizProgressBar").style.width = "100%";
+  $("quizQuestion").textContent =
+    `You scored ${quizScore} out of ${quizQuestions.length}!`;
+
+  $("quizOptions").innerHTML = "";
+
+  $("quizFeedback").textContent =
+    quizScore === quizQuestions.length
+      ? "Perfect score! Excellent work."
+      : "Nice effort! Keep practising.";
+
+  $("quizNext").textContent = "Play again";
+  $("quizNext").disabled = false;
+
+  data.quizDone = true;
+  save();
+  updateStreak();
+}
+
+function initDailyQuiz() {
+  const day = Math.floor(Date.now() / 86400000);
+
+  quizQuestions = Array.from(
+    {length: 5},
+    (_, i) => {
+      const q = questionBank[
+        (day * 3 + i * 2) % questionBank.length
+      ];
+
+      return {...q};
+    }
+  );
+
+  quizIndex = 0;
+  quizScore = 0;
+  quizAnswered = false;
+  quizFinished = false;
+
+  $("quizLabel").textContent = "DAILY CHALLENGE";
+  $("aiQuizStatus").textContent =
+    "Try today's challenge or create your own quiz.";
+
+  renderQuiz();
+}
+
+async function generateAiQuiz() {
+  const topic = $("aiQuizTopic").value.trim();
+  const difficulty = $("aiQuizDifficulty").value;
+  const count = Number($("aiQuizCount").value);
+
+  if (topic.length < 2) {
+    $("aiQuizStatus").textContent =
+      "Please enter a topic first.";
+    return;
+  }
+
+  const button = $("generateAiQuiz");
+  button.disabled = true;
+  button.textContent = "Generating...";
+  $("aiQuizStatus").textContent =
+    "AI is preparing your questions. Please wait...";
+
+  try {
+    const response = await fetch(AI_QUIZ_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        topic,
+        difficulty,
+        count
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Quiz generation failed.");
+    }
+
+    if (!Array.isArray(result.questions) ||
+        result.questions.length !== count) {
+      throw new Error("The AI returned an invalid quiz.");
+    }
+
+    quizQuestions = result.questions.map(q => ({
+      q: q.question,
+      o: q.options,
+      a: q.correctIndex,
+      e: q.explanation
+    }));
+
+    quizIndex = 0;
+    quizScore = 0;
+    quizAnswered = false;
+    quizFinished = false;
+
+    $("quizLabel").textContent =
+      "AI QUIZ · " + topic.toUpperCase();
+
+    $("aiQuizStatus").textContent =
+      `Your ${count}-question quiz is ready!`;
+
+    renderQuiz();
+
+  } catch (error) {
+    console.error("AI quiz error:", error);
+    $("aiQuizStatus").textContent =
+      error.message || "Something went wrong. Please try again.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "✦ Generate AI quiz";
+  }
+}
+
+$("generateAiQuiz").addEventListener("click", generateAiQuiz);
+
+$("quizNext").addEventListener("click", () => {
+  if (quizFinished) {
+    initDailyQuiz();
+    return;
+  }
+
+  if (!quizAnswered) return;
+
+  if (quizIndex < quizQuestions.length - 1) {
+    quizIndex++;
+    renderQuiz();
+  } else {
+    finishQuiz();
+  }
+});
+
+initDailyQuiz();
