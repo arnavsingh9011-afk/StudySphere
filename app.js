@@ -691,7 +691,6 @@ function renderCards() {
 
 function flip() {
   if (!data.cards.length) return;
-
   flipped = !flipped;
   renderCards();
 }
