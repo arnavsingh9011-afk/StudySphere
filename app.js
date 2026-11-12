@@ -630,6 +630,7 @@ function answerQuiz(index) {
 
 function finishQuiz() {
   quizFinished = true;
+  saveQuizHistory();
 
   $("quizProgress").textContent = "COMPLETED";
   $("quizProgressBar").style.width = "100%";
@@ -726,6 +727,8 @@ async function generateAiQuiz() {
       a: q.correctIndex,
       e: q.explanation
     }));
+    currentQuizTitle = topic;
+currentQuizDifficulty = difficulty;
 
     quizIndex = 0;
     quizScore = 0;
