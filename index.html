@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
+  <meta name="description" content="StudySphere is a free student productivity hub with a focus timer, grade calculator, percentage calculator, exam countdown, flashcards and daily quiz.">
+  <title>StudySphere — Your study space</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="StudySphere home"><span class="brand-mark">S</span><span>Study<span class="brand-accent">Sphere</span></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="nav-list" aria-label="Main navigation">
+        <button class="nav-item active" data-view="overview"><span>◫</span> Overview</button>
+        <button class="nav-item" data-view="focus"><span>◷</span> Focus timer</button>
+        <button class="nav-item" data-view="calculators"><span>⌗</span> Calculators</button>
+        <button class="nav-item" data-view="countdown"><span>▦</span> Exam countdown</button>
+        <button class="nav-item" data-view="flashcards"><span>▤</span> Flashcards</button>
+        <button class="nav-item" data-view="quiz"><span>✳</span> Daily quiz</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="side-label">YOUR PROGRESS</div>
+        <div class="streak-card"><div class="streak-icon">✦</div><div><strong id="streakNumber">0 day streak</strong><small>Keep showing up.</small></div></div>
+        <div class="sidebar-note">A little progress every day adds up.</div>
+        <div class="side-footer">STUDYSPHERE <span>•</span> FREE FOREVER</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="menuBtn" aria-label="Open menu">☰</button>
+        <div class="breadcrumb">Workspace <span>/</span> <strong id="crumb">Overview</strong></div>
+        <div class="top-actions"><span class="today-label" id="todayLabel"></span><div class="avatar">S</div></div>
+      </header>
+
+      <section class="view active-view" id="view-overview">
+        <div class="welcome-row">
+          <div><div class="eyebrow"><span class="live-dot"></span> YOUR PERSONAL STUDY SPACE</div><h1>Make today <span>count.</span></h1><p class="subheading">Small steps. Strong habits. Better results.</p></div>
+          <div class="date-chip" id="dateChip">TODAY</div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-copy"><div class="hero-kicker">READY WHEN YOU ARE</div><h2>One focused session<br>can change your day.</h2><p>Block out distractions and give your next task your full attention.</p><button class="primary-btn" data-go="focus">Start focusing <span>↗</span></button></div>
+          <div class="hero-orbit"><div class="orbit-ring ring-a"></div><div class="orbit-ring ring-b"></div><div class="orbit-core"><span>✦</span><small>FOCUS</small></div><i class="orbit-dot dot-a"></i><i class="orbit-dot dot-b"></i><i class="orbit-dot dot-c"></i></div>
+          <div class="hero-grid"></div>
+        </div>
+        <div class="section-heading"><div><div class="eyebrow">YOUR TOOLKIT</div><h2>Everything in one place</h2></div><span class="muted">6 STUDY TOOLS</span></div>
+        <div class="tool-grid">
+          <button class="tool-card" data-go="focus"><span class="tool-icon purple">◷</span><span class="tool-title">Focus timer</span><span class="tool-desc">Work in focused intervals.</span><span class="card-arrow">↗</span></button>
+          <button class="tool-card" data-go="calculators"><span class="tool-icon blue">⌗</span><span class="tool-title">Calculators</span><span class="tool-desc">Percentages and grades, made easy.</span><span class="card-arrow">↗</span></button>
+          <button class="tool-card" data-go="countdown"><span class="tool-icon orange">▦</span><span class="tool-title">Exam countdown</span><span class="tool-desc">Keep important dates in sight.</span><span class="card-arrow">↗</span></button>
+          <button class="tool-card" data-go="flashcards"><span class="tool-icon green">▤</span><span class="tool-title">Flashcards</span><span class="tool-desc">Create cards and test your recall.</span><span class="card-arrow">↗</span></button>
+          <button class="tool-card" data-go="quiz"><span class="tool-icon pink">✳</span><span class="tool-title">Daily quiz</span><span class="tool-desc">A quick knowledge challenge.</span><span class="card-arrow">↗</span></button>
+          <div class="tool-card quote-card"><span class="quote-mark">“</span><p>Consistency is built one session at a time.</p><small>YOUR DAILY REMINDER</small></div>
+        </div>
+        <div class="bottom-grid">
+          <div class="panel"><div class="panel-head"><div><div class="eyebrow">QUICK START</div><h3>Plan a focus session</h3></div><span class="panel-symbol">◷</span></div><p class="muted">Choose a task and start with just 25 minutes.</p><div class="quick-start"><input id="quickTask" maxlength="80" placeholder="What are you working on?"><button class="primary-btn small" id="quickStartBtn">Start timer</button></div></div>
+          <div class="panel progress-panel"><div class="eyebrow">YOUR ACTIVITY</div><h3>Build your streak</h3><div class="progress-number" id="overviewStreak">0 <small>days</small></div><p class="muted">Complete a focus session or daily quiz to check in today.</p></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-focus">
+        <div class="page-heading"><div class="eyebrow">DEEP WORK MODE</div><h1>Focus <span>timer.</span></h1><p class="subheading">Give one thing your full attention.</p></div>
+        <div class="focus-layout">
+          <div class="panel timer-panel">
+            <div class="timer-tabs"><button class="timer-tab active" data-minutes="25" data-mode="Focus">Focus</button><button class="timer-tab" data-minutes="5" data-mode="Short break">Short break</button><button class="timer-tab" data-minutes="15" data-mode="Long break">Long break</button></div>
+            <div class="timer-ring" id="timerRing"><div class="timer-inner"><div class="timer-mode" id="timerMode">FOCUS SESSION</div><div class="timer-display" id="timerDisplay">25:00</div><div class="timer-caption" id="timerCaption">Time to concentrate</div></div></div>
+            <div class="timer-controls"><button class="primary-btn" id="timerStart">Start session</button><button class="secondary-btn" id="timerReset">Reset</button></div>
+            <div class="timer-foot"><span>◷ 25 MINUTES</span><span>✦ ONE TASK AT A TIME</span></div>
+          </div>
+          <div class="panel task-panel"><div class="eyebrow">SESSION NOTES</div><h3>What are you focusing on?</h3><textarea id="focusTask" placeholder="e.g. Revise quadratic equations..."></textarea><div class="tip-box"><span>✦</span><div><strong>Focus tip</strong><p>Put your phone away, close extra tabs, and decide what “done” looks like before you begin.</p></div></div><div class="session-stat"><span>Completed sessions</span><strong id="sessionCount">0</strong></div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-calculators">
+        <div class="page-heading"><div class="eyebrow">NUMBERS MADE SIMPLE</div><h1>Study <span>calculators.</span></h1><p class="subheading">Fast answers for everyday school calculations.</p></div>
+        <div class="calculator-grid">
+          <div class="panel calculator"><div class="calc-icon blue">％</div><h3>Percentage calculator</h3><p class="muted">Find what percentage one number is of another.</p><label>Value obtained</label><input type="number" id="percentValue" placeholder="e.g. 420"><label>Total value</label><input type="number" id="percentTotal" placeholder="e.g. 500"><button class="primary-btn full" id="percentBtn">Calculate percentage</button><div class="result-box" id="percentResult">Your result will appear here.</div></div>
+          <div class="panel calculator"><div class="calc-icon purple">A+</div><h3>Grade calculator</h3><p class="muted">Calculate your average across subjects.</p><div id="gradeRows"><div class="grade-row"><input type="text" placeholder="Subject" aria-label="Subject"><input type="number" min="0" max="100" placeholder="Score %" aria-label="Score percentage"></div><div class="grade-row"><input type="text" placeholder="Subject" aria-label="Subject"><input type="number" min="0" max="100" placeholder="Score %" aria-label="Score percentage"></div><div class="grade-row"><input type="text" placeholder="Subject" aria-label="Subject"><input type="number" min="0" max="100" placeholder="Score %" aria-label="Score percentage"></div></div><button class="text-btn" id="addGrade">+ Add subject</button><button class="primary-btn full" id="gradeBtn">Calculate average</button><div class="result-box" id="gradeResult">Your average will appear here.</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-countdown">
+        <div class="page-heading"><div class="eyebrow">KEEP YOUR GOALS IN SIGHT</div><h1>Exam <span>countdown.</span></h1><p class="subheading">Set a date. Make a plan. Take it one day at a time.</p></div>
+        <div class="countdown-layout">
+          <div class="panel countdown-panel"><div class="eyebrow">YOUR NEXT BIG DATE</div><h2 id="examNameDisplay">Your next exam</h2><div class="count-number" id="daysRemaining">—</div><div class="count-caption" id="countCaption">DAYS TO GO</div><div class="count-date" id="examDateDisplay">Add your exam date below</div></div>
+          <div class="panel"><div class="eyebrow">SET YOUR COUNTDOWN</div><h3>What's coming up?</h3><label>Exam or event name</label><input id="examName" maxlength="60" placeholder="e.g. Final mathematics exam"><label>Exam date</label><input type="date" id="examDate"><button class="primary-btn full" id="saveExam">Save countdown</button><button class="text-btn" id="clearExam">Clear countdown</button><p class="tiny muted">Your countdown is saved on this device.</p></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-flashcards">
+        <div class="page-heading"><div class="eyebrow">ACTIVE RECALL</div><h1>Flash<span>cards.</span></h1><p class="subheading">Make your own cards and practise remembering.</p></div>
+        <div class="flash-layout">
+          <div class="panel flash-study"><div class="flash-top"><span class="eyebrow">YOUR DECK</span><span class="muted" id="cardPosition">0 CARDS</span></div><button class="flashcard" id="flashcard" aria-label="Flip flashcard"><span class="flash-label" id="flashLabel">YOUR QUESTION</span><strong id="flashText">Add your first flashcard to begin.</strong><small id="flashHint">Click the card to reveal the answer</small></button><div class="flash-controls"><button class="secondary-btn" id="prevCard">← Previous</button><button class="primary-btn" id="flipCard">Flip card</button><button class="secondary-btn" id="nextCard">Next →</button></div></div>
+          <div class="panel"><div class="eyebrow">CREATE A CARD</div><h3>Add to your deck</h3><label>Question / front</label><textarea id="newQuestion" placeholder="What do you want to remember?"></textarea><label>Answer / back</label><textarea id="newAnswer" placeholder="Write the answer here..."></textarea><button class="primary-btn full" id="addCard">Add flashcard</button><div class="deck-footer"><span id="deckCount">0 cards saved</span><button class="text-btn danger" id="deleteCard">Delete current card</button></div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-quiz">
+        <div class="page-heading"><div class="eyebrow">A LITTLE CHALLENGE</div><h1>Daily <span>quiz.</span></h1><p class="subheading">Test what you know. Learn something new.</p></div>
+        <div class="quiz-wrap panel"><div class="quiz-meta"><span class="eyebrow">GENERAL KNOWLEDGE</span><span class="muted" id="quizProgress">QUESTION 1 OF 5</span></div><div class="quiz-progress"><div id="quizProgressBar"></div></div><div class="quiz-question" id="quizQuestion">Loading today's challenge...</div><div class="quiz-options" id="quizOptions"></div><div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div><div class="quiz-bottom"><span class="muted" id="quizScore">Score: 0</span><button class="primary-btn" id="quizNext" disabled>Next question →</button></div></div>
+      </section>
+
+      <footer class="footer"><span>© <span id="year"></span> StudySphere</span><span>Made for curious minds. <a href="mailto:hello@studysphere.example">Contact</a></span><span>Free student tools · No account needed</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
