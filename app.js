@@ -689,9 +689,8 @@ function renderCards() {
   $("deleteCard").disabled = false;
 }
 
-function flip() 
-{  
-if (!data.cards.length) return;
+function flip() {
+  if (!data.cards.length) return;
 
   flipped = !flipped;
   renderCards();
