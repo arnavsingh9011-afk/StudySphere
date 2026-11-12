@@ -652,6 +652,8 @@ function finishQuiz() {
 }
 
 function initDailyQuiz() {
+  currentQuizTitle = "Daily Challenge";
+currentQuizDifficulty = "Mixed";
   const day = Math.floor(Date.now() / 86400000);
 
   quizQuestions = Array.from(
