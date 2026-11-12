@@ -527,3 +527,61 @@ h1,h2,h3 {
     grid-template-columns: 1fr;
   }
 }
+/* QUIZ HISTORY */
+
+.quiz-history {
+  max-width: 760px;
+  margin: 20px auto;
+}
+
+.quiz-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.quiz-history-heading h3 {
+  margin: 8px 0 0;
+}
+
+.quiz-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.quiz-history-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.quiz-history-details strong {
+  overflow-wrap: anywhere;
+}
+
+.quiz-history-details span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.quiz-history-score {
+  color: var(--blue);
+  white-space: nowrap;
+}
+
+#clearQuizHistory {
+  cursor: pointer;
+}
+
+@media(max-width: 500px) {
+  .quiz-history-heading {
+    align-items: flex-start;
+  }
+}
