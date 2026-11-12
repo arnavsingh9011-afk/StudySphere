@@ -426,7 +426,7 @@ updateExamDateMinimum();
 renderExamCountdown();
 
 setInterval(renderExamCountdown, 60000);
-  const now = Date.now();
+  const currentDate = new Date();
 
   const upcoming = data.exams
     .filter(exam => getExamDate(exam.date).getTime() >= now)
