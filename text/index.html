@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Study Timer | StudySphere</title>
+<meta name="description" content="Free customizable online study timer. Choose your focus and break durations with StudySphere.">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090d18;color:#eef2ff;font-family:Arial,sans-serif;min-height:100vh;display:grid;place-items:center;padding:20px}
+.card{width:100%;max-width:520px;background:#141c2e;border:1px solid #293650;border-radius:22px;padding:30px;text-align:center}
+a{color:#9daeff;text-decoration:none}
+h1{margin:12px 0 8px}
+p{color:#aab6ce}
+.modes{display:flex;gap:8px;justify-content:center;margin:25px 0}
+button{cursor:pointer;border:0;border-radius:10px;padding:12px 17px;background:#26334d;color:white;font-weight:bold}
+button.active,.primary{background:#6578ff}
+.time{font-size:76px;font-weight:bold;letter-spacing:2px;margin:25px 0}
+.settings{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+label{font-size:13px;color:#b9c5dc}
+input{width:100%;margin-top:8px;padding:12px 5px;border-radius:9px;border:1px solid #405071;background:#0c1424;color:white;text-align:center;font-size:17px}
+.controls{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.controls button{min-width:110px}
+.status{color:#aab6ce;min-height:22px}
+@media(max-width:400px){.time{font-size:60px}.settings{gap:6px}}
+</style>
+</head>
+<body>
+<main class="card">
+<a href="../">← Back to StudySphere</a>
+<h1>Focus Timer</h1>
+<p>Make every study session count.</p>
+
+<div class="modes">
+<button class="active" data-mode="focus">Focus</button>
+<button data-mode="short">Short break</button>
+<button data-mode="long">Long break</button>
+</div>
+
+<div class="time" id="clock">25:00</div>
+<div class="status" id="status">Ready when you are.</div>
+
+<div class="controls">
+<button class="primary" id="start">Start</button>
+<button id="reset">Reset</button>
+</div>
+
+<h3>Customize your timer</h3>
+<div class="settings">
+<label>Focus (min)
+<input id="focusInput" type="number" min="1" max="180" value="25">
+</label>
+<label>Short break
+<input id="shortInput" type="number" min="1" max="60" value="5">
+</label>
+<label>Long break
+<input id="longInput" type="number" min="1" max="60" value="15">
+</label>
+</div>
+
+<button id="save" class="primary">Save settings</button>
+<p id="sessions">Completed focus sessions: 0</p>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let durations = {focus:25,short:5,long:15};
+let mode = "focus";
+let remaining = 1500;
+let running = false;
+let interval = null;
+let completed = 0;
+
+function display(){
+  $("clock").textContent =
+    String(Math.floor(remaining/60)).padStart(2,"0")+":"+
+    String(remaining%60).padStart(2,"0");
+  document.title = $("clock").textContent+" | StudySphere";
+}
+
+function stop(){
+  clearInterval(interval);
+  interval = null;
+  running = false;
+  $("start").textContent = "Start";
+}
+
+function choose(next){
+  stop();
+  mode = next;
+  remaining = durations[mode]*60;
+  document.querySelectorAll("[data-mode]").forEach(b =>
+    b.classList.toggle("active",b.dataset.mode===mode));
+  $("status").textContent = "Ready for your "+mode+" session.";
+  display();
+}
+
+function tick(){
+  if(remaining>0){
+    remaining--;
+    display();
+    return;
+  }
+  stop();
+  if(mode==="focus"){
+    completed++;
+    $("sessions").textContent = "Completed focus sessions: "+completed;
+    choose("short");
+    $("status").textContent = "Focus complete! Time for a break.";
+  }else{
+    choose("focus");
+    $("status").textContent = "Break finished! Ready to focus?";
+  }
+}
+
+$("start").addEventListener("click",()=>{
+  if(running){stop();$("status").textContent="Timer paused.";return;}
+  running=true;
+  $("start").textContent="Pause";
+  $("status").textContent="Stay focused!";
+  interval=setInterval(tick,1000);
+});
+
+$("reset").addEventListener("click",()=>{
+  stop();
+  remaining=durations[mode]*60;
+  $("status").textContent="Timer reset.";
+  display();
+});
+
+document.querySelectorAll("[data-mode]").forEach(b =>
+  b.addEventListener("click",()=>choose(b.dataset.mode)));
+
+$("save").addEventListener("click",()=>{
+  const values={
+    focus:Number($("focusInput").value),
+    short:Number($("shortInput").value),
+    long:Number($("longInput").value)
+  };
+  if(Object.values(values).some(v=>!Number.isInteger(v)||v<1) ||
+     values.focus>180 || values.short>60 || values.long>60){
+    $("status").textContent="Enter valid durations within the limits.";
+    return;
+  }
+  durations=values;
+  localStorage.setItem("ssTimerSettings",JSON.stringify(durations));
+  choose(mode);
+  $("status").textContent="Your settings have been saved!";
+});
+
+try{
+  const saved=JSON.parse(localStorage.getItem("ssTimerSettings"));
+  if(saved && saved.focus && saved.short && saved.long){
+    durations=saved;
+    $("focusInput").value=saved.focus;
+    $("shortInput").value=saved.short;
+    $("longInput").value=saved.long;
+    remaining=durations.focus*60;
+  }
+}catch(e){}
+
+display();
+</script>
+</body>
+</html>
