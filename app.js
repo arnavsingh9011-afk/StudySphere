@@ -426,45 +426,7 @@ updateExamDateMinimum();
 renderExamCountdown();
 
 setInterval(renderExamCountdown, 60000);
-  const currentDate = new Date();
-
-  const upcoming = data.exams
-    .filter(exam => getExamDate(exam.date).getTime() >= now)
-    .sort((a, b) => getExamDate(a.date) - getExamDate(b.date));
-
-  const nextExam = upcoming[0];
-
-  if (!nextExam) {
-    const latestPast = [...data.exams]
-      .sort((a, b) => getExamDate(b.date) - getExamDate(a.date))[0];
-
-    $("examNameDisplay").textContent = latestPast
-      ? latestPast.name
-      : "No upcoming exams";
-
-    $("daysRemaining").textContent = latestPast ? "0" : "—";
-    $("countCaption").textContent = latestPast
-      ? "NO UPCOMING EXAMS"
-      : "ADD YOUR FIRST EXAM";
-
-    $("examDateDisplay").textContent = latestPast
-      ? "Your last exam was " + formatExamDate(latestPast.date)
-      : "Your upcoming exams will appear here.";
-  } else {
-    const difference = getExamDate(nextExam.date).getTime() - now;
-    const days = Math.floor(difference / 86400000);
-    const hours = Math.floor((difference % 86400000) / 3600000);
-    const minutes = Math.floor((difference % 3600000) / 60000);
-
-    $("examNameDisplay").textContent = nextExam.name;
-    $("daysRemaining").textContent = days;
-    $("countCaption").textContent =
-      `${hours} HOURS · ${minutes} MINUTES LEFT`;
-    $("examDateDisplay").textContent = formatExamDate(nextExam.date);
-  }
-
-  renderExamList();
-
+  
 function renderExamList() {
   const list = $("examList");
   list.innerHTML = "";
