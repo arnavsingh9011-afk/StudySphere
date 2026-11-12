@@ -176,7 +176,7 @@
   <div class="page-heading">
     <div class="eyebrow">AI-POWERED LEARNING</div>
     <h1>Study <span>quiz.</span></h1>
-    <p class="subheading">Choose any topic. Let AI create your challenge.</p>
+    <p class="subheading">Choose a topic. Generate a quiz. Track your progress.</p>
   </div>
 
   <div class="panel quiz-generator">
@@ -215,11 +215,27 @@
     </p>
   </div>
 
-  <div class="quiz-wrap panel">
-    <div class="quiz-meta">
-      <span class="eyebrow" id="quizLabel">DAILY CHALLENGE</span>
-      <span class="muted" id="quizProgress">QUESTION 1 OF 5</span>
-    </div>
+  
+<div class="quiz-wrap panel" id="quizWrap" hidden>
+  <div class="quiz-meta">
+    <span class="eyebrow" id="quizLabel">AI QUIZ</span>
+    <span class="muted" id="quizProgress"></span>
+  </div>
+  <div class="quiz-progress">
+    <div id="quizProgressBar"></div>
+  </div>
+  <div class="quiz-question" id="quizQuestion"></div>
+  <div class="quiz-options" id="quizOptions"></div>
+  <div class="quiz-feedback" id="quizFeedback"
+    aria-live="polite"></div>
+  <div class="quiz-bottom">
+    <span class="muted" id="quizScore">Score: 0</span>
+    <button class="primary-btn" id="quizNext" disabled>
+      Next question →
+    </button>
+  </div>
+</div>
+
     <div class="quiz-progress">
       <div id="quizProgressBar"></div>
     </div>
