@@ -1,0 +1,5 @@
+
+User-agent: *
+Allow: /
+
+Sitemap: https://arnavsingh9011-afk.github.io/StudySphere/sitemap.xml
