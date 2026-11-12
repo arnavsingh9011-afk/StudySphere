@@ -15,17 +15,178 @@ $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"))
 const now=new Date(); $("todayLabel").textContent=now.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); $("dateChip").textContent=now.toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"}).toUpperCase(); $("year").textContent=now.getFullYear();
 renderStreak();
 
+
 // Focus timer
-let timerSeconds=1500,remaining=1500,timerInterval=null,timerRunning=false,currentMode="Focus";
-function formatTime(s){return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;}
-function renderTimer(){ $("timerDisplay").textContent=formatTime(remaining); const elapsed=timerSeconds-remaining; const deg=timerSeconds?elapsed/timerSeconds*360:0; $("timerRing").style.background=`conic-gradient(#83aaff ${deg}deg,#253650 ${deg}deg)`; $("timerStart").textContent=timerRunning?"Pause session":"Start session"; $("timerCaption").textContent=timerRunning?"Stay with the task":"Time to concentrate"; }
-function stopTimer(){clearInterval(timerInterval);timerInterval=null;timerRunning=false;renderTimer();}
-function setMode(minutes,mode){stopTimer();currentMode=mode;timerSeconds=minutes*60;remaining=timerSeconds;$("timerMode").textContent=mode.toUpperCase()+" SESSION";document.querySelectorAll(".timer-tab").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));renderTimer();}
-document.querySelectorAll(".timer-tab").forEach(b=>b.addEventListener("click",()=>setMode(Number(b.dataset.minutes),b.dataset.mode)));
-$("timerStart").addEventListener("click",()=>{if(timerRunning){stopTimer();return;} timerRunning=true;renderTimer();timerInterval=setInterval(()=>{remaining--;renderTimer();if(remaining<=0){stopTimer();if(currentMode==="Focus"){data.sessions++;save();updateStreak();renderStreak();toast("Focus session complete. Great work!");}else toast("Break complete. Ready to focus?");try{new AudioContext().resume().then(()=>{});}catch{} }},1000);});
-$("timerReset").addEventListener("click",()=>{stopTimer();remaining=timerSeconds;renderTimer();});
-$("quickStartBtn").addEventListener("click",()=>{const task=$("quickTask").value.trim();if(task)$("focusTask").value=task;go("focus");setMode(25,"Focus");$("timerStart").click();});
+const TIMER_STORE = "studysphere_timer_settings";
+
+const timerDefaults = {
+  Focus: 25,
+  "Short break": 5,
+  "Long break": 15
+};
+
+let timerSettings = {...timerDefaults};
+
+try {
+  timerSettings = {
+    ...timerDefaults,
+    ...JSON.parse(localStorage.getItem(TIMER_STORE) || "{}")
+  };
+} catch {}
+
+let timerSeconds = timerSettings.Focus * 60;
+let remaining = timerSeconds;
+let timerInterval = null;
+let timerRunning = false;
+let currentMode = "Focus";
+
+function formatTime(s) {
+  return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+}
+
+function renderTimer() {
+  $("timerDisplay").textContent = formatTime(remaining);
+
+  const elapsed = timerSeconds - remaining;
+  const deg = timerSeconds ? elapsed / timerSeconds * 360 : 0;
+
+  $("timerRing").style.background =
+    `conic-gradient(#83aaff ${deg}deg,#253650 ${deg}deg)`;
+
+  $("timerStart").textContent =
+    timerRunning ? "Pause session" : "Start session";
+
+  $("timerCaption").textContent =
+    timerRunning ? "Stay with the task" : "Time to concentrate";
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerRunning = false;
+  renderTimer();
+}
+
+function setMode(minutes, mode) {
+  stopTimer();
+
+  currentMode = mode;
+  timerSeconds = minutes * 60;
+  remaining = timerSeconds;
+
+  $("timerMode").textContent = mode.toUpperCase() + " SESSION";
+
+  document.querySelectorAll(".timer-tab").forEach(b => {
+    b.classList.toggle("active", b.dataset.mode === mode);
+  });
+
+  renderTimer();
+}
+
+// Load saved values into custom timer inputs
+function loadTimerSettings() {
+  $("customFocus").value = timerSettings.Focus;
+  $("customShort").value = timerSettings["Short break"];
+  $("customLong").value = timerSettings["Long break"];
+}
+
+// Save custom settings
+$("saveCustomTimer").addEventListener("click", () => {
+  const focus = Number($("customFocus").value);
+  const short = Number($("customShort").value);
+  const long = Number($("customLong").value);
+
+  if (
+    !Number.isInteger(focus) || focus < 1 || focus > 180 ||
+    !Number.isInteger(short) || short < 1 || short > 60 ||
+    !Number.isInteger(long) || long < 1 || long > 60
+  ) {
+    $("customTimerStatus").textContent =
+      "Please enter valid whole numbers within the allowed limits.";
+    return;
+  }
+
+  timerSettings = {
+    Focus: focus,
+    "Short break": short,
+    "Long break": long
+  };
+
+  localStorage.setItem(TIMER_STORE, JSON.stringify(timerSettings));
+
+  // Update tab values
+  document.querySelectorAll(".timer-tab").forEach(button => {
+    const mode = button.dataset.mode;
+    button.dataset.minutes = timerSettings[mode];
+  });
+
+  // Immediately update the current timer
+  setMode(timerSettings[currentMode], currentMode);
+
+  $("customTimerStatus").textContent = "Your custom timer settings have been saved!";
+  toast("Custom timer saved.");
+});
+
+loadTimerSettings();
+
+// Timer mode buttons
+document.querySelectorAll(".timer-tab").forEach(button => {
+  button.addEventListener("click", () => {
+    const mode = button.dataset.mode;
+    setMode(timerSettings[mode], mode);
+  });
+});
+
+// Start / pause
+$("timerStart").addEventListener("click", () => {
+  if (timerRunning) {
+    stopTimer();
+    return;
+  }
+
+  timerRunning = true;
+  renderTimer();
+
+  timerInterval = setInterval(() => {
+    remaining--;
+    renderTimer();
+
+    if (remaining <= 0) {
+      stopTimer();
+
+      if (currentMode === "Focus") {
+        data.sessions++;
+        save();
+        updateStreak();
+        renderStreak();
+        toast("Focus session complete. Great work!");
+      } else {
+        toast("Break complete. Ready to focus?");
+      }
+    }
+  }, 1000);
+});
+
+// Reset
+$("timerReset").addEventListener("click", () => {
+  stopTimer();
+  remaining = timerSeconds;
+  renderTimer();
+});
+
+// Quick start uses the saved focus duration
+$("quickStartBtn").addEventListener("click", () => {
+  const task = $("quickTask").value.trim();
+
+  if (task) $("focusTask").value = task;
+
+  go("focus");
+  setMode(timerSettings.Focus, "Focus");
+  $("timerStart").click();
+});
+
 renderTimer();
+
 
 // Percentage calculator
 $("percentBtn").addEventListener("click",()=>{const v=Number($("percentValue").value),t=Number($("percentTotal").value);if($("percentValue").value===""||$("percentTotal").value===""||!Number.isFinite(v)||!Number.isFinite(t)||t===0){$("percentResult").textContent="Enter valid numbers. The total cannot be zero.";return;} $("percentResult").innerHTML=`<strong>${(v/t*100).toFixed(2)}%</strong> <span class="muted">(${v} out of ${t})</span>`;});
