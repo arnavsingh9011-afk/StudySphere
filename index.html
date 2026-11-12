@@ -113,13 +113,55 @@
         </div>
       </section>
 
-      <section class="view" id="view-countdown">
-        <div class="page-heading"><div class="eyebrow">KEEP YOUR GOALS IN SIGHT</div><h1>Exam <span>countdown.</span></h1><p class="subheading">Set a date. Make a plan. Take it one day at a time.</p></div>
-        <div class="countdown-layout">
-          <div class="panel countdown-panel"><div class="eyebrow">YOUR NEXT BIG DATE</div><h2 id="examNameDisplay">Your next exam</h2><div class="count-number" id="daysRemaining">—</div><div class="count-caption" id="countCaption">DAYS TO GO</div><div class="count-date" id="examDateDisplay">Add your exam date below</div></div>
-          <div class="panel"><div class="eyebrow">SET YOUR COUNTDOWN</div><h3>What's coming up?</h3><label>Exam or event name</label><input id="examName" maxlength="60" placeholder="e.g. Final mathematics exam"><label>Exam date</label><input type="date" id="examDate"><button class="primary-btn full" id="saveExam">Save countdown</button><button class="text-btn" id="clearExam">Clear countdown</button><p class="tiny muted">Your countdown is saved on this device.</p></div>
-        </div>
-      </section>
+      
+<section class="view" id="view-countdown">
+  <div class="page-heading">
+    <div class="eyebrow">KEEP YOUR GOALS IN SIGHT</div>
+    <h1>Exam <span>countdown.</span></h1>
+    <p class="subheading">Every exam. One place. Stay prepared.</p>
+  </div>
+
+  <div class="countdown-layout">
+    <div class="panel countdown-panel">
+      <div class="eyebrow">YOUR NEXT BIG DATE</div>
+      <h2 id="examNameDisplay">No upcoming exams</h2>
+      <div class="count-number" id="daysRemaining">—</div>
+      <div class="count-caption" id="countCaption">ADD YOUR FIRST EXAM</div>
+      <div class="count-date" id="examDateDisplay">Your upcoming exams will appear here.</div>
+    </div>
+
+    <div class="panel">
+      <div class="eyebrow" id="examFormHeading">BUILD YOUR SCHEDULE</div>
+      <h3 id="examFormTitle">Add an exam</h3>
+
+      <label for="examName">Exam or event name</label>
+      <input id="examName" maxlength="60" placeholder="e.g. Mathematics board exam">
+
+      <label for="examDate">Date and time</label>
+      <input type="datetime-local" id="examDate">
+
+      <button class="primary-btn full" id="saveExam">Add exam</button>
+      <button class="text-btn" id="cancelExamEdit" type="button" hidden>Cancel editing</button>
+      <p class="tiny muted">Your exams are saved automatically on this device.</p>
+    </div>
+  </div>
+
+  <div class="section-heading exam-list-heading">
+    <div>
+      <div class="eyebrow">YOUR SCHEDULE</div>
+      <h2>All exams</h2>
+    </div>
+    <span class="muted" id="examCount">0 EXAMS</span>
+  </div>
+
+  <div class="exam-list" id="examList">
+    <div class="panel exam-empty">
+      <h3>No exams added yet</h3>
+      <p class="muted">Add your first exam using the form above.</p>
+    </div>
+  </div>
+</section>
+
 
       <section class="view" id="view-flashcards">
         <div class="page-heading"><div class="eyebrow">ACTIVE RECALL</div><h1>Flash<span>cards.</span></h1><p class="subheading">Make your own cards and practise remembering.</p></div>
