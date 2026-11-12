@@ -484,6 +484,88 @@ let quizScore = 0;
 let quizAnswered = false;
 let quizFinished = false;
 
+let currentQuizTitle = "Daily Challenge";
+let currentQuizDifficulty = "Mixed";
+
+const QUIZ_HISTORY_KEY = "studysphere_quiz_history_v1";
+
+function getQuizHistory() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(QUIZ_HISTORY_KEY) || "[]"
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveQuizHistory() {
+  const history = getQuizHistory();
+
+  history.unshift({
+    title: currentQuizTitle,
+    difficulty: currentQuizDifficulty,
+    score: quizScore,
+    total: quizQuestions.length,
+    date: new Date().toISOString()
+  });
+
+  localStorage.setItem(
+    QUIZ_HISTORY_KEY,
+    JSON.stringify(history.slice(0, 50))
+  );
+
+  renderQuizHistory();
+}
+
+function renderQuizHistory() {
+  const container = $("quizHistoryList");
+  if (!container) return;
+
+  const history = getQuizHistory();
+  container.innerHTML = "";
+
+  if (!history.length) {
+    container.textContent = "No completed quizzes yet.";
+    container.className = "muted";
+    return;
+  }
+
+  container.className = "";
+
+  history.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "quiz-history-item";
+
+    const details = document.createElement("div");
+    details.className = "quiz-history-details";
+
+    const title = document.createElement("strong");
+    title.textContent = item.title;
+
+    const meta = document.createElement("span");
+    meta.textContent =
+      `${item.difficulty} · ${new Date(item.date).toLocaleDateString()}`;
+
+    const score = document.createElement("strong");
+    score.className = "quiz-history-score";
+    score.textContent = `${item.score}/${item.total}`;
+
+    details.append(title, meta);
+    row.append(details, score);
+    container.append(row);
+  });
+}
+
+$("clearQuizHistory").addEventListener("click", () => {
+  if (!confirm("Clear all your quiz history?")) return;
+
+  localStorage.removeItem(QUIZ_HISTORY_KEY);
+  renderQuizHistory();
+});
+
+renderQuizHistory();
+
 function renderQuiz() {
   if (quizFinished) return;
 
