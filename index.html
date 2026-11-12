@@ -70,7 +70,33 @@
         <div class="page-heading"><div class="eyebrow">DEEP WORK MODE</div><h1>Focus <span>timer.</span></h1><p class="subheading">Give one thing your full attention.</p></div>
         <div class="focus-layout">
           <div class="panel timer-panel">
-            <div class="timer-tabs"><button class="timer-tab active" data-minutes="25" data-mode="Focus">Focus</button><button class="timer-tab" data-minutes="5" data-mode="Short break">Short break</button><button class="timer-tab" data-minutes="15" data-mode="Long break">Long break</button></div>
+            
+<div class="timer-tabs">
+  <button class="timer-tab active" data-minutes="25" data-mode="Focus">Focus</button>
+  <button class="timer-tab" data-minutes="5" data-mode="Short break">Short break</button>
+  <button class="timer-tab" data-minutes="15" data-mode="Long break">Long break</button>
+</div>
+
+<div class="custom-timer">
+  <h3>Customize your sessions</h3>
+  <div class="custom-timer-grid">
+    <label>
+      Focus (minutes)
+      <input type="number" id="customFocus" min="1" max="180" value="25">
+    </label>
+    <label>
+      Short break (minutes)
+      <input type="number" id="customShort" min="1" max="60" value="5">
+    </label>
+    <label>
+      Long break (minutes)
+      <input type="number" id="customLong" min="1" max="60" value="15">
+    </label>
+  </div>
+  <button class="secondary-btn" id="saveCustomTimer">Save custom settings</button>
+  <p id="customTimerStatus" class="muted">Choose your preferred durations.</p>
+</div>
+
             <div class="timer-ring" id="timerRing"><div class="timer-inner"><div class="timer-mode" id="timerMode">FOCUS SESSION</div><div class="timer-display" id="timerDisplay">25:00</div><div class="timer-caption" id="timerCaption">Time to concentrate</div></div></div>
             <div class="timer-controls"><button class="primary-btn" id="timerStart">Start session</button><button class="secondary-btn" id="timerReset">Reset</button></div>
             <div class="timer-foot"><span>◷ 25 MINUTES</span><span>✦ ONE TASK AT A TIME</span></div>
