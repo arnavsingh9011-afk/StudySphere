@@ -8,7 +8,7 @@ function toast(message){ const el=$("toast"); el.textContent=message; el.classLi
 function localDateKey(date=new Date()){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`; }
 function updateStreak(){ const today=localDateKey(); if(data.lastVisit!==today){ const yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1); data.streak=data.lastVisit===localDateKey(yesterday)?data.streak+1:1; data.lastVisit=today; save(); } renderStreak(); }
 function renderStreak(){ $("streakNumber").textContent=`${data.streak} day${data.streak===1?"":"s"} streak`; $("overviewStreak").innerHTML=`${data.streak} <small>days</small>`; $("sessionCount").textContent=data.sessions; }
-function go(view){ document.querySelectorAll(".view").forEach(v=>v.classList.remove("active-view")); $("view-"+view).classList.add("active-view"); document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===view)); const label={overview:"Overview",focus:"Focus timer",calculators:"Calculators",countdown:"Exam countdown",flashcards:"Flashcards",quiz:"Daily quiz"}; $("crumb").textContent=label[view]; $("sidebar").classList.remove("open"); window.scrollTo({top:0,behavior:"smooth"}); }
+function go(view){ document.querySelectorAll(".view").forEach(v=>v.classList.remove("active-view")); $("view-"+view).classList.add("active-view"); document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===view)); const label={overview:"Overview",focus:"Focus timer",calculators:"Calculators",countdown:"Exam countdown",flashcards:"Flashcards",quiz:"AI Quiz"}; $("crumb").textContent=label[view]; $("sidebar").classList.remove("open"); window.scrollTo({top:0,behavior:"smooth"}); }
 document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.view)));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
 $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
@@ -489,23 +489,10 @@ $("nextCard").addEventListener("click",()=>{if(!data.cards.length)return;cardInd
 $("deleteCard").addEventListener("click",()=>{if(!data.cards.length)return;data.cards.splice(cardIndex,1);cardIndex=Math.max(0,cardIndex-1);flipped=false;save();renderCards();toast("Flashcard deleted.");});renderCards();
 
 
-// AI-POWERED QUIZ + DAILY QUIZ
+// AI-POWERED QUIZ
 
 const AI_QUIZ_URL =
   "https://studysphere-ai.arnavsingh9011.workers.dev";
-
-const questionBank = [
-  {q:"Which planet is known as the Red Planet?",o:["Venus","Mars","Jupiter","Mercury"],a:1,e:"Mars looks reddish because iron minerals in its soil have oxidised."},
-  {q:"What is the chemical symbol for gold?",o:["Ag","Gd","Au","Go"],a:2,e:"Au comes from the Latin word aurum."},
-  {q:"Which part of a plant mainly absorbs water from soil?",o:["Leaves","Flower","Root hairs","Stem"],a:2,e:"Root hairs provide a large surface area for water absorption."},
-  {q:"What is the largest ocean on Earth?",o:["Atlantic","Indian","Arctic","Pacific"],a:3,e:"The Pacific Ocean is the largest and deepest ocean."},
-  {q:"How many sides does a hexagon have?",o:["Five","Six","Seven","Eight"],a:1,e:"A hexagon has six sides."},
-  {q:"Which gas do plants absorb during photosynthesis?",o:["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"],a:2,e:"Plants use carbon dioxide and water to make glucose."},
-  {q:"What is the square root of 144?",o:["10","11","12","14"],a:2,e:"12 × 12 = 144."},
-  {q:"Which is the closest star to Earth?",o:["Sirius","The Sun","Proxima Centauri","Polaris"],a:1,e:"The Sun is our nearest star."},
-  {q:"What is the SI unit of electric current?",o:["Volt","Ohm","Watt","Ampere"],a:3,e:"Electric current is measured in amperes (A)."},
-  {q:"Which continent has the most countries?",o:["Asia","Europe","Africa","South America"],a:2,e:"Africa has the highest number of sovereign countries."}
-];
 
 let quizQuestions = [];
 let quizIndex = 0;
@@ -513,8 +500,8 @@ let quizScore = 0;
 let quizAnswered = false;
 let quizFinished = false;
 
-let currentQuizTitle = "Daily Challenge";
-let currentQuizDifficulty = "Mixed";
+let currentQuizTitle = "";
+let currentQuizDifficulty = "";
 
 const QUIZ_HISTORY_KEY = "studysphere_quiz_history_v1";
 
@@ -681,11 +668,6 @@ function finishQuiz() {
   updateStreak();
 }
 
-function initDailyQuiz() {
-  currentQuizTitle = "Daily Challenge";
-currentQuizDifficulty = "Mixed";
-  const day = Math.floor(Date.now() / 86400000);
-
   quizQuestions = Array.from(
     {length: 5},
     (_, i) => {
@@ -766,6 +748,7 @@ currentQuizDifficulty = difficulty;
 
     $("quizLabel").textContent =
       "AI QUIZ · " + topic.toUpperCase();
+    $("quizWrap").hidden = false;
 
     $("aiQuizStatus").textContent =
       `Your ${count}-question quiz is ready!`;
@@ -782,11 +765,13 @@ currentQuizDifficulty = difficulty;
   }
 }
 
-$("generateAiQuiz").addEventListener("click", generateAiQuiz);
 
 $("quizNext").addEventListener("click", () => {
   if (quizFinished) {
-    initDailyQuiz();
+    $("quizWrap").hidden = true;
+    $("aiQuizTopic").focus();
+    $("aiQuizStatus").textContent =
+      "Enter a topic to generate another quiz.";
     return;
   }
 
@@ -799,5 +784,3 @@ $("quizNext").addEventListener("click", () => {
     finishQuiz();
   }
 });
-
-initDailyQuiz();
