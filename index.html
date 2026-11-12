@@ -171,10 +171,73 @@
         </div>
       </section>
 
-      <section class="view" id="view-quiz">
-        <div class="page-heading"><div class="eyebrow">A LITTLE CHALLENGE</div><h1>Daily <span>quiz.</span></h1><p class="subheading">Test what you know. Learn something new.</p></div>
-        <div class="quiz-wrap panel"><div class="quiz-meta"><span class="eyebrow">GENERAL KNOWLEDGE</span><span class="muted" id="quizProgress">QUESTION 1 OF 5</span></div><div class="quiz-progress"><div id="quizProgressBar"></div></div><div class="quiz-question" id="quizQuestion">Loading today's challenge...</div><div class="quiz-options" id="quizOptions"></div><div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div><div class="quiz-bottom"><span class="muted" id="quizScore">Score: 0</span><button class="primary-btn" id="quizNext" disabled>Next question →</button></div></div>
-      </section>
+     
+<section class="view" id="view-quiz">
+  <div class="page-heading">
+    <div class="eyebrow">AI-POWERED LEARNING</div>
+    <h1>Study <span>quiz.</span></h1>
+    <p class="subheading">Choose any topic. Let AI create your challenge.</p>
+  </div>
+
+  <div class="panel quiz-generator">
+    <div class="eyebrow">CREATE YOUR OWN QUIZ</div>
+    <h3>What do you want to learn?</h3>
+
+    <label for="aiQuizTopic">Enter a topic</label>
+    <input id="aiQuizTopic" maxlength="150"
+      placeholder="e.g. Class 10 Electricity, World War II, Algebra">
+
+    <div class="quiz-generator-grid">
+      <div>
+        <label for="aiQuizDifficulty">Difficulty</label>
+        <select id="aiQuizDifficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="aiQuizCount">Questions</label>
+        <select id="aiQuizCount">
+          <option value="3">3 questions</option>
+          <option value="5" selected>5 questions</option>
+          <option value="10">10 questions</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="primary-btn full" id="generateAiQuiz">
+      ✦ Generate AI quiz
+    </button>
+    <p class="muted" id="aiQuizStatus" aria-live="polite">
+      Enter a topic to get started.
+    </p>
+  </div>
+
+  <div class="quiz-wrap panel">
+    <div class="quiz-meta">
+      <span class="eyebrow" id="quizLabel">DAILY CHALLENGE</span>
+      <span class="muted" id="quizProgress">QUESTION 1 OF 5</span>
+    </div>
+    <div class="quiz-progress">
+      <div id="quizProgressBar"></div>
+    </div>
+    <div class="quiz-question" id="quizQuestion">
+      Generate a quiz or try today's challenge.
+    </div>
+    <div class="quiz-options" id="quizOptions"></div>
+    <div class="quiz-feedback" id="quizFeedback"
+      aria-live="polite"></div>
+    <div class="quiz-bottom">
+      <span class="muted" id="quizScore">Score: 0</span>
+      <button class="primary-btn" id="quizNext" disabled>
+        Next question →
+      </button>
+    </div>
+  </div>
+</section>
+
 
       <footer class="footer"><span>© <span id="year"></span> StudySphere</span><span>Made for curious minds. <a href="mailto:hello@studysphere.example">Contact</a></span><span>Free student tools · No account needed</span></footer>
     </main>
