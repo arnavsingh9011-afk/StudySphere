@@ -308,3 +308,89 @@ h1,h2,h3 {
     top: 8px;
   }
 }
+/* STUDYSPHERE — FLOATING GLASS SIDEBAR */
+
+.sidebar {
+  position: fixed;
+  inset: 12px auto 12px 12px;
+
+  width: 226px;
+  height: auto;
+  padding: 26px 16px 18px;
+
+  background: linear-gradient(
+    145deg,
+    rgba(20, 39, 68, 0.94),
+    rgba(8, 19, 37, 0.91)
+  ) !important;
+
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+
+  border: 1px solid rgba(100, 170, 255, 0.25);
+  border-radius: 20px;
+
+  box-shadow:
+    0 15px 45px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 0 25px rgba(40, 120, 255, 0.08);
+
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 150, 220, 0.25) transparent;
+}
+
+/* Brand spacing */
+
+.brand {
+  padding-bottom: 38px;
+}
+
+/* Navigation hover glow */
+
+.nav-item:hover {
+  background: rgba(65, 140, 255, 0.13);
+  border-color: rgba(100, 170, 255, 0.15);
+}
+
+/* Active navigation */
+
+.nav-item.active {
+  background: linear-gradient(
+    110deg,
+    rgba(55, 135, 255, 0.24),
+    rgba(55, 135, 255, 0.06)
+  );
+  border: 1px solid rgba(85, 170, 255, 0.25);
+  box-shadow:
+    inset 3px 0 #55aaff,
+    0 0 18px rgba(45, 125, 255, 0.08);
+}
+
+/* Streak card */
+
+.streak-card {
+  background: rgba(75, 125, 195, 0.10);
+  border: 1px solid rgba(130, 175, 240, 0.17);
+}
+
+/* Sidebar footer */
+
+.side-footer {
+  border-top-color: rgba(130, 175, 240, 0.14);
+}
+
+/* Mobile sidebar */
+
+@media(max-width:760px) {
+  .sidebar {
+    width: 250px;
+    inset: 10px auto 10px 10px;
+    border-radius: 18px;
+    transform: translateX(calc(-100% - 15px));
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}
