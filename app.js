@@ -464,7 +464,6 @@ setInterval(renderExamCountdown, 60000);
   }
 
   renderExamList();
-}
 
 function renderExamList() {
   const list = $("examList");
