@@ -200,9 +200,259 @@ $("percentBtn").addEventListener("click",()=>{const v=Number($("percentValue").v
 $("addGrade").addEventListener("click",()=>{if($("gradeRows").children.length>=12){toast("Maximum 12 subjects.");return;}const row=document.createElement("div");row.className="grade-row";row.innerHTML='<input type="text" placeholder="Subject" aria-label="Subject"><input type="number" min="0" max="100" placeholder="Score %" aria-label="Score percentage">';$("gradeRows").append(row);});
 $("gradeBtn").addEventListener("click",()=>{const inputs=[...$("gradeRows").querySelectorAll('input[type="number"]')].filter(i=>i.value!=="");if(!inputs.length||inputs.some(i=>Number(i.value)<0||Number(i.value)>100)){$("gradeResult").textContent="Enter at least one score between 0 and 100.";return;}const avg=inputs.reduce((s,i)=>s+Number(i.value),0)/inputs.length;$("gradeResult").innerHTML=`Average: <strong>${avg.toFixed(2)}%</strong> <span class="muted">across ${inputs.length} subject${inputs.length===1?"":"s"}</span>`;});
 
-// Exam countdown
-function renderExam(){if(!data.exam){$("examNameDisplay").textContent="Your next exam";$("daysRemaining").textContent="—";$("countCaption").textContent="DAYS TO GO";$("examDateDisplay").textContent="Add your exam date below";return;}const [y,m,d]=data.exam.date.split("-").map(Number);const target=new Date(y,m-1,d);const today=new Date();today.setHours(0,0,0,0);const days=Math.round((target-today)/86400000);$("examNameDisplay").textContent=data.exam.name||"Upcoming exam";$("daysRemaining").textContent=days<0?Math.abs(days):days;$("countCaption").textContent=days<0?"DAYS SINCE":days===0?"EXAM DAY":"DAYS TO GO";$("examDateDisplay").textContent=target.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});}
-if(data.exam){$("examName").value=data.exam.name;$("examDate").value=data.exam.date;} $("saveExam").addEventListener("click",()=>{const name=$("examName").value.trim(),date=$("examDate").value;if(!date){toast("Please choose an exam date.");return;}data.exam={name,date};save();renderExam();toast("Your countdown has been saved.");});$("clearExam").addEventListener("click",()=>{data.exam=null;save();$("examName").value="";$("examDate").value="";renderExam();toast("Countdown cleared.");});renderExam();
+
+// Multiple exam countdowns
+// Automatically migrate the previous single-exam format.
+if (!Array.isArray(data.exams)) {
+  data.exams = data.exam
+    ? [{
+        id: "legacy-exam",
+        name: data.exam.name || "Upcoming exam",
+        date: data.exam.date.length === 10
+          ? data.exam.date + "T09:00"
+          : data.exam.date
+      }]
+    : [];
+}
+
+function getExamDate(date) {
+  return new Date(date);
+}
+
+function formatExamDate(date) {
+  return getExamDate(date).toLocaleString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function updateExamDateMinimum() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  $("examDate").min = now.toISOString().slice(0, 16);
+}
+
+let editingExamId = null;
+
+function renderExamCountdown() {
+  const now = Date.now();
+
+  const upcoming = data.exams
+    .filter(exam => getExamDate(exam.date).getTime() >= now)
+    .sort((a, b) => getExamDate(a.date) - getExamDate(b.date));
+
+  const nextExam = upcoming[0];
+
+  if (!nextExam) {
+    const latestPast = [...data.exams]
+      .sort((a, b) => getExamDate(b.date) - getExamDate(a.date))[0];
+
+    $("examNameDisplay").textContent = latestPast
+      ? latestPast.name
+      : "No upcoming exams";
+
+    $("daysRemaining").textContent = latestPast ? "0" : "—";
+    $("countCaption").textContent = latestPast
+      ? "NO UPCOMING EXAMS"
+      : "ADD YOUR FIRST EXAM";
+
+    $("examDateDisplay").textContent = latestPast
+      ? "Your last exam was " + formatExamDate(latestPast.date)
+      : "Your upcoming exams will appear here.";
+  } else {
+    const difference = getExamDate(nextExam.date).getTime() - now;
+    const days = Math.floor(difference / 86400000);
+    const hours = Math.floor((difference % 86400000) / 3600000);
+    const minutes = Math.floor((difference % 3600000) / 60000);
+
+    $("examNameDisplay").textContent = nextExam.name;
+    $("daysRemaining").textContent = days;
+    $("countCaption").textContent =
+      `${hours} HOURS · ${minutes} MINUTES LEFT`;
+    $("examDateDisplay").textContent = formatExamDate(nextExam.date);
+  }
+
+  renderExamList();
+}
+
+function renderExamList() {
+  const list = $("examList");
+  list.innerHTML = "";
+
+  const now = Date.now();
+
+  const sortedExams = [...data.exams].sort((a, b) => {
+    const aTime = getExamDate(a.date).getTime();
+    const bTime = getExamDate(b.date).getTime();
+
+    const aPast = aTime < now;
+    const bPast = bTime < now;
+
+    if (aPast !== bPast) return aPast ? 1 : -1;
+    return aTime - bTime;
+  });
+
+  $("examCount").textContent =
+    `${data.exams.length} EXAM${data.exams.length === 1 ? "" : "S"}`;
+
+  if (!sortedExams.length) {
+    const empty = document.createElement("div");
+    empty.className = "panel exam-empty";
+
+    const heading = document.createElement("h3");
+    heading.textContent = "No exams added yet";
+
+    const message = document.createElement("p");
+    message.className = "muted";
+    message.textContent = "Add your first exam using the form above.";
+
+    empty.append(heading, message);
+    list.append(empty);
+    return;
+  }
+
+  sortedExams.forEach(exam => {
+    const card = document.createElement("div");
+    card.className = "panel exam-card";
+
+    const details = document.createElement("div");
+    details.className = "exam-details";
+
+    const name = document.createElement("h3");
+    name.textContent = exam.name;
+
+    const date = document.createElement("p");
+    date.className = "muted";
+    date.textContent = formatExamDate(exam.date);
+
+    const time = getExamDate(exam.date).getTime();
+    const remaining = time - now;
+
+    const status = document.createElement("span");
+    status.className = "exam-status";
+
+    if (remaining <= 0) {
+      status.textContent = "Completed";
+      status.classList.add("exam-completed");
+    } else {
+      const days = Math.floor(remaining / 86400000);
+      const hours = Math.floor((remaining % 86400000) / 3600000);
+      status.textContent = `${days}d ${hours}h remaining`;
+    }
+
+    details.append(name, date, status);
+
+    const actions = document.createElement("div");
+    actions.className = "exam-actions";
+
+    const edit = document.createElement("button");
+    edit.className = "secondary-btn";
+    edit.textContent = "Edit";
+    edit.type = "button";
+    edit.addEventListener("click", () => editExam(exam.id));
+
+    const remove = document.createElement("button");
+    remove.className = "text-btn danger";
+    remove.textContent = "Delete";
+    remove.type = "button";
+    remove.addEventListener("click", () => deleteExam(exam.id));
+
+    actions.append(edit, remove);
+    card.append(details, actions);
+    list.append(card);
+  });
+}
+
+function editExam(id) {
+  const exam = data.exams.find(item => item.id === id);
+  if (!exam) return;
+
+  editingExamId = id;
+  $("examName").value = exam.name;
+  $("examDate").value = exam.date;
+  $("examFormTitle").textContent = "Edit exam";
+  $("examFormHeading").textContent = "UPDATE YOUR SCHEDULE";
+  $("saveExam").textContent = "Save changes";
+  $("cancelExamEdit").hidden = false;
+
+  $("examName").focus();
+  $("examName").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function resetExamForm() {
+  editingExamId = null;
+  $("examName").value = "";
+  $("examDate").value = "";
+  $("examFormTitle").textContent = "Add an exam";
+  $("examFormHeading").textContent = "BUILD YOUR SCHEDULE";
+  $("saveExam").textContent = "Add exam";
+  $("cancelExamEdit").hidden = true;
+  updateExamDateMinimum();
+}
+
+function deleteExam(id) {
+  data.exams = data.exams.filter(exam => exam.id !== id);
+  save();
+
+  if (editingExamId === id) resetExamForm();
+
+  renderExamCountdown();
+  toast("Exam deleted.");
+}
+
+$("saveExam").addEventListener("click", () => {
+  const name = $("examName").value.trim();
+  const date = $("examDate").value;
+
+  if (!name) {
+    toast("Please enter an exam name.");
+    return;
+  }
+
+  if (!date || Number.isNaN(getExamDate(date).getTime())) {
+    toast("Please choose a valid exam date and time.");
+    return;
+  }
+
+  if (getExamDate(date).getTime() <= Date.now()) {
+    toast("Please choose a future date and time.");
+    return;
+  }
+
+  if (editingExamId) {
+    const exam = data.exams.find(item => item.id === editingExamId);
+    if (exam) {
+      exam.name = name;
+      exam.date = date;
+    }
+    toast("Exam updated.");
+  } else {
+    data.exams.push({
+      id: (crypto.randomUUID
+        ? crypto.randomUUID()
+        : String(Date.now()) + Math.random().toString(36).slice(2)),
+      name,
+      date
+    });
+    toast("Exam added successfully.");
+  }
+
+  save();
+  resetExamForm();
+  renderExamCountdown();
+});
+
+$("cancelExamEdit").addEventListener("click", resetExamForm);
+
+updateExamDateMinimum();
+renderExamCountdown();
+
+// Keep all countdowns live.
+setInterval(renderExamCountdown, 30000);
 
 // Flashcards
 let cardIndex=0,flipped=false;
