@@ -16,22 +16,14 @@ const now=new Date(); $("todayLabel").textContent=now.toLocaleDateString(undefin
 renderStreak();
 
 
-// Focus timer
-const TIMER_STORE = "studysphere_timer_settings";
 
-const timerDefaults = {
-  Focus: 25,
-  "Short break": 5,
-  "Long break": 15
-};
+ // Focus timer
+const TIMER_STORE = "studysphere_timer_settings";
+const timerDefaults = {Focus:25,"Short break":5,"Long break":15};
 
 let timerSettings = {...timerDefaults};
-
 try {
-  timerSettings = {
-    ...timerDefaults,
-    ...JSON.parse(localStorage.getItem(TIMER_STORE) || "{}")
-  };
+  timerSettings = {...timerDefaults,...JSON.parse(localStorage.getItem(TIMER_STORE)||"{}")};
 } catch {}
 
 let timerSeconds = timerSettings.Focus * 60;
@@ -41,23 +33,15 @@ let timerRunning = false;
 let currentMode = "Focus";
 
 function formatTime(s) {
-  return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
 }
 
 function renderTimer() {
   $("timerDisplay").textContent = formatTime(remaining);
-
-  const elapsed = timerSeconds - remaining;
-  const deg = timerSeconds ? elapsed / timerSeconds * 360 : 0;
-
-  $("timerRing").style.background =
-    `conic-gradient(#83aaff ${deg}deg,#253650 ${deg}deg)`;
-
-  $("timerStart").textContent =
-    timerRunning ? "Pause session" : "Start session";
-
-  $("timerCaption").textContent =
-    timerRunning ? "Stay with the task" : "Time to concentrate";
+  const deg = timerSeconds ? (timerSeconds-remaining)/timerSeconds*360 : 0;
+  $("timerRing").style.background = `conic-gradient(#83aaff ${deg}deg,#253650 ${deg}deg)`;
+  $("timerStart").textContent = timerRunning ? "Pause session" : "Start session";
+  $("timerCaption").textContent = timerRunning ? "Stay with the task" : "Time to concentrate";
 }
 
 function stopTimer() {
@@ -67,79 +51,61 @@ function stopTimer() {
   renderTimer();
 }
 
-function setMode(minutes, mode) {
+function setMode(minutes,mode) {
   stopTimer();
-
   currentMode = mode;
-  timerSeconds = minutes * 60;
+  timerSeconds = minutes*60;
   remaining = timerSeconds;
-
-  $("timerMode").textContent = mode.toUpperCase() + " SESSION";
-
+  $("timerMode").textContent = mode.toUpperCase()+" SESSION";
   document.querySelectorAll(".timer-tab").forEach(b => {
-    b.classList.toggle("active", b.dataset.mode === mode);
+    b.classList.toggle("active",b.dataset.mode===mode);
   });
-
   renderTimer();
 }
 
-// Load saved values into custom timer inputs
+// Custom settings
 function loadTimerSettings() {
   $("customFocus").value = timerSettings.Focus;
   $("customShort").value = timerSettings["Short break"];
   $("customLong").value = timerSettings["Long break"];
 }
 
-// Save custom settings
-$("saveCustomTimer").addEventListener("click", () => {
+$("saveCustomTimer").addEventListener("click",() => {
   const focus = Number($("customFocus").value);
   const short = Number($("customShort").value);
   const long = Number($("customLong").value);
 
   if (
-    !Number.isInteger(focus) || focus < 1 || focus > 180 ||
-    !Number.isInteger(short) || short < 1 || short > 60 ||
-    !Number.isInteger(long) || long < 1 || long > 60
+    !Number.isInteger(focus) || focus<1 || focus>180 ||
+    !Number.isInteger(short) || short<1 || short>60 ||
+    !Number.isInteger(long) || long<1 || long>60
   ) {
-    $("customTimerStatus").textContent =
-      "Please enter valid whole numbers within the allowed limits.";
+    $("customTimerStatus").textContent = "Enter valid whole numbers within the limits.";
     return;
   }
 
-  timerSettings = {
-    Focus: focus,
-    "Short break": short,
-    "Long break": long
-  };
+  timerSettings = {Focus:focus,"Short break":short,"Long break":long};
+  localStorage.setItem(TIMER_STORE,JSON.stringify(timerSettings));
 
-  localStorage.setItem(TIMER_STORE, JSON.stringify(timerSettings));
-
-  // Update tab values
-  document.querySelectorAll(".timer-tab").forEach(button => {
-    const mode = button.dataset.mode;
-    button.dataset.minutes = timerSettings[mode];
+  document.querySelectorAll(".timer-tab").forEach(b => {
+    b.dataset.minutes = timerSettings[b.dataset.mode];
   });
 
-  // Immediately update the current timer
-  setMode(timerSettings[currentMode], currentMode);
-
-  $("customTimerStatus").textContent = "Your custom timer settings have been saved!";
+  setMode(timerSettings[currentMode],currentMode);
+  $("customTimerStatus").textContent = "Settings saved successfully!";
   toast("Custom timer saved.");
 });
 
 loadTimerSettings();
 
-// Timer mode buttons
-document.querySelectorAll(".timer-tab").forEach(button => {
-  button.addEventListener("click", () => {
-    const mode = button.dataset.mode;
-    setMode(timerSettings[mode], mode);
+document.querySelectorAll(".timer-tab").forEach(b => {
+  b.addEventListener("click",() => {
+    setMode(timerSettings[b.dataset.mode],b.dataset.mode);
   });
 });
 
-// Start / pause
-$("timerStart").addEventListener("click", () => {
-  if (timerRunning) {
+$("timerStart").addEventListener("click",() => {
+  if(timerRunning) {
     stopTimer();
     return;
   }
@@ -151,10 +117,10 @@ $("timerStart").addEventListener("click", () => {
     remaining--;
     renderTimer();
 
-    if (remaining <= 0) {
+    if(remaining<=0) {
       stopTimer();
 
-      if (currentMode === "Focus") {
+      if(currentMode==="Focus") {
         data.sessions++;
         save();
         updateStreak();
@@ -164,24 +130,20 @@ $("timerStart").addEventListener("click", () => {
         toast("Break complete. Ready to focus?");
       }
     }
-  }, 1000);
+  },1000);
 });
 
-// Reset
-$("timerReset").addEventListener("click", () => {
+$("timerReset").addEventListener("click",() => {
   stopTimer();
   remaining = timerSeconds;
   renderTimer();
 });
 
-// Quick start uses the saved focus duration
-$("quickStartBtn").addEventListener("click", () => {
+$("quickStartBtn").addEventListener("click",() => {
   const task = $("quickTask").value.trim();
-
-  if (task) $("focusTask").value = task;
-
+  if(task) $("focusTask").value = task;
   go("focus");
-  setMode(timerSettings.Focus, "Focus");
+  setMode(timerSettings.Focus,"Focus");
   $("timerStart").click();
 });
 
