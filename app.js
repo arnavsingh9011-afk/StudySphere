@@ -234,36 +234,52 @@ function updateExamDateMinimum() {
   $("examDate").min = localDateKey();
 }
 
+
+let selectedExamId = null;
+
 function renderExamCountdown() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const selectedExam = data.exams.find(
+    exam => exam.id === selectedExamId
+  );
+
+  // If the selected exam was deleted, choose the nearest upcoming exam.
   const upcoming = data.exams
     .filter(exam => getExamDate(exam.date) >= today)
     .sort((a, b) => getExamDate(a.date) - getExamDate(b.date));
 
-  const nextExam = upcoming[0];
+  const displayExam = selectedExam || upcoming[0] || null;
 
-  if (!nextExam) {
+  if (!displayExam) {
+    selectedExamId = null;
     $("examNameDisplay").textContent = "No upcoming exams";
     $("daysRemaining").textContent = "—";
     $("countCaption").textContent = "ADD YOUR FIRST EXAM";
     $("examDateDisplay").textContent =
       "Your upcoming exams will appear here.";
   } else {
-    const difference = getExamDate(nextExam.date) - today;
+    selectedExamId = displayExam.id;
+
+    const difference =
+      getExamDate(displayExam.date) - today;
+
     const days = Math.round(difference / 86400000);
 
-    $("examNameDisplay").textContent = nextExam.name;
-    $("daysRemaining").textContent = days;
+    $("examNameDisplay").textContent = displayExam.name;
+    $("daysRemaining").textContent = days < 0 ? "Passed" : days;
     $("countCaption").textContent =
+      days < 0 ? "EXAM COMPLETED" :
       days === 0 ? "EXAM DAY" : "DAYS TO GO";
+
     $("examDateDisplay").textContent =
-      formatExamDate(nextExam.date);
+      formatExamDate(displayExam.date);
   }
 
   renderExamList();
 }
+
 
 function renderExamList() {
   const list = $("examList");
