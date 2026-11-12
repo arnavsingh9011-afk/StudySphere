@@ -1,24 +1,134 @@
+
 const $ = (id) => document.getElementById(id);
+
 const STORE = "studysphere_v1";
-const defaults = {streak:0,lastVisit:null,sessions:0,exam:null,cards:[],quizDate:null,quizDone:false};
-let data = {...defaults};
-try { data = {...defaults, ...JSON.parse(localStorage.getItem(STORE) || "{}")}; } catch {}
-function save(){ localStorage.setItem(STORE, JSON.stringify(data)); }
-function toast(message){ const el=$("toast"); el.textContent=message; el.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove("show"),2400); }
-function localDateKey(date=new Date()){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`; }
-function updateStreak(){ const today=localDateKey(); if(data.lastVisit!==today){ const yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1); data.streak=data.lastVisit===localDateKey(yesterday)?data.streak+1:1; data.lastVisit=today; save(); } renderStreak(); }
-function renderStreak(){ $("streakNumber").textContent=`${data.streak} day${data.streak===1?"":"s"} streak`; $("overviewStreak").innerHTML=`${data.streak} <small>days</small>`; $("sessionCount").textContent=data.sessions; }
-function go(view){ document.querySelectorAll(".view").forEach(v=>v.classList.remove("active-view")); $("view-"+view).classList.add("active-view"); document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===view)); const label={overview:"Overview",focus:"Focus timer",calculators:"Calculators",countdown:"Exam countdown",flashcards:"Flashcards",quiz:"AI Quiz"}; $("crumb").textContent=label[view]; $("sidebar").classList.remove("open"); window.scrollTo({top:0,behavior:"smooth"}); }
-document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.view)));
-document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
-$("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
-const now=new Date(); $("todayLabel").textContent=now.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); $("dateChip").textContent=now.toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"}).toUpperCase(); $("year").textContent=now.getFullYear();
+const defaults = {
+  streak: 0,
+  lastVisit: null,
+  sessions: 0,
+  exam: null,
+  cards: [],
+  quizDate: null,
+  quizDone: false
+};
+
+let data = { ...defaults };
+
+try {
+  data = {
+    ...defaults,
+    ...JSON.parse(localStorage.getItem(STORE) || "{}")
+  };
+} catch {}
+
+function save() {
+  localStorage.setItem(STORE, JSON.stringify(data));
+}
+
+function toast(message) {
+  const el = $("toast");
+  if (!el) return;
+
+  el.textContent = message;
+  el.classList.add("show");
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => el.classList.remove("show"), 2400);
+}
+
+function localDateKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function updateStreak() {
+  const today = localDateKey();
+
+  if (data.lastVisit !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    data.streak =
+      data.lastVisit === localDateKey(yesterday)
+        ? data.streak + 1
+        : 1;
+
+    data.lastVisit = today;
+    save();
+  }
+
+  renderStreak();
+}
+
+function renderStreak() {
+  $("streakNumber").textContent =
+    `${data.streak} day${data.streak === 1 ? "" : "s"} streak`;
+
+  $("overviewStreak").innerHTML =
+    `${data.streak} <small>days</small>`;
+
+  $("sessionCount").textContent = data.sessions;
+}
+
+function go(view) {
+  document.querySelectorAll(".view").forEach(v =>
+    v.classList.remove("active-view")
+  );
+
+  $("view-" + view).classList.add("active-view");
+
+  document.querySelectorAll(".nav-item").forEach(b =>
+    b.classList.toggle("active", b.dataset.view === view)
+  );
+
+  const label = {
+    overview: "Overview",
+    focus: "Focus timer",
+    calculators: "Calculators",
+    countdown: "Exam countdown",
+    flashcards: "Flashcards",
+    quiz: "AI Quiz"
+  };
+
+  $("crumb").textContent = label[view];
+  $("sidebar").classList.remove("open");
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.querySelectorAll("[data-view]").forEach(b =>
+  b.addEventListener("click", () => go(b.dataset.view))
+);
+
+document.querySelectorAll("[data-go]").forEach(b =>
+  b.addEventListener("click", () => go(b.dataset.go))
+);
+
+$("menuBtn").addEventListener("click", () =>
+  $("sidebar").classList.toggle("open")
+);
+
+const now = new Date();
+
+$("todayLabel").textContent = now.toLocaleDateString(undefined, {
+  weekday: "short",
+  month: "short",
+  day: "numeric"
+});
+
+$("dateChip").textContent = now.toLocaleDateString(undefined, {
+  month: "long",
+  day: "numeric",
+  year: "numeric"
+}).toUpperCase();
+
+$("year").textContent = now.getFullYear();
+
 renderStreak();
 
 
+// ========================================
+// FOCUS TIMER WITH CUSTOM SETTINGS
+// ========================================
 
-
-// Focus timer with custom settings
 const TIMER_STORAGE_KEY = "studysphere_custom_timer";
 
 const defaultDurations = {
@@ -31,11 +141,16 @@ let customDurations = { ...defaultDurations };
 
 try {
   const saved = JSON.parse(localStorage.getItem(TIMER_STORAGE_KEY));
+
   if (saved) {
     for (const mode of Object.keys(defaultDurations)) {
       const value = Number(saved[mode]);
-      if (Number.isInteger(value) && value >= 1 &&
-          value <= (mode === "Focus" ? 180 : 60)) {
+
+      if (
+        Number.isInteger(value) &&
+        value >= 1 &&
+        value <= (mode === "Focus" ? 180 : 60)
+      ) {
         customDurations[mode] = value;
       }
     }
@@ -70,7 +185,10 @@ function renderTimer() {
     timerRunning ? "Stay with the task" : "Time to concentrate";
 
   const foot = document.querySelector(".timer-foot span");
-  if (foot) foot.textContent = `◷ ${customDurations[currentMode]} MINUTES`;
+
+  if (foot) {
+    foot.textContent = `◷ ${customDurations[currentMode]} MINUTES`;
+  }
 }
 
 function stopTimer() {
@@ -96,12 +214,10 @@ function setMode(minutes, mode) {
   renderTimer();
 }
 
-// Load saved values into the custom settings inputs
 $("customFocus").value = customDurations.Focus;
 $("customShort").value = customDurations["Short break"];
 $("customLong").value = customDurations["Long break"];
 
-// Save custom settings
 $("saveCustomTimer").addEventListener("click", () => {
   const focus = Number($("customFocus").value);
   const shortBreak = Number($("customShort").value);
@@ -123,7 +239,10 @@ $("saveCustomTimer").addEventListener("click", () => {
     "Long break": longBreak
   };
 
-  localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(customDurations));
+  localStorage.setItem(
+    TIMER_STORAGE_KEY,
+    JSON.stringify(customDurations)
+  );
 
   document.querySelectorAll(".timer-tab").forEach(button => {
     button.dataset.minutes = customDurations[button.dataset.mode];
@@ -135,7 +254,6 @@ $("saveCustomTimer").addEventListener("click", () => {
     "Settings saved successfully!";
 });
 
-// Timer mode buttons
 document.querySelectorAll(".timer-tab").forEach(button => {
   button.addEventListener("click", () => {
     setMode(
@@ -145,7 +263,6 @@ document.querySelectorAll(".timer-tab").forEach(button => {
   });
 });
 
-// Start and pause
 $("timerStart").addEventListener("click", () => {
   if (timerRunning) {
     stopTimer();
@@ -175,14 +292,12 @@ $("timerStart").addEventListener("click", () => {
   }, 1000);
 });
 
-// Reset
 $("timerReset").addEventListener("click", () => {
   stopTimer();
   remaining = timerSeconds;
   renderTimer();
 });
 
-// Quick start
 $("quickStartBtn").addEventListener("click", () => {
   const task = $("quickTask").value.trim();
 
@@ -195,15 +310,72 @@ $("quickStartBtn").addEventListener("click", () => {
 
 renderTimer();
 
-// Percentage calculator
-$("percentBtn").addEventListener("click",()=>{const v=Number($("percentValue").value),t=Number($("percentTotal").value);if($("percentValue").value===""||$("percentTotal").value===""||!Number.isFinite(v)||!Number.isFinite(t)||t===0){$("percentResult").textContent="Enter valid numbers. The total cannot be zero.";return;} $("percentResult").innerHTML=`<strong>${(v/t*100).toFixed(2)}%</strong> <span class="muted">(${v} out of ${t})</span>`;});
-$("addGrade").addEventListener("click",()=>{if($("gradeRows").children.length>=12){toast("Maximum 12 subjects.");return;}const row=document.createElement("div");row.className="grade-row";row.innerHTML='<input type="text" placeholder="Subject" aria-label="Subject"><input type="number" min="0" max="100" placeholder="Score %" aria-label="Score percentage">';$("gradeRows").append(row);});
-$("gradeBtn").addEventListener("click",()=>{const inputs=[...$("gradeRows").querySelectorAll('input[type="number"]')].filter(i=>i.value!=="");if(!inputs.length||inputs.some(i=>Number(i.value)<0||Number(i.value)>100)){$("gradeResult").textContent="Enter at least one score between 0 and 100.";return;}const avg=inputs.reduce((s,i)=>s+Number(i.value),0)/inputs.length;$("gradeResult").innerHTML=`Average: <strong>${avg.toFixed(2)}%</strong> <span class="muted">across ${inputs.length} subject${inputs.length===1?"":"s"}</span>`;});
+
+// ========================================
+// CALCULATORS
+// ========================================
+
+$("percentBtn").addEventListener("click", () => {
+  const v = Number($("percentValue").value);
+  const t = Number($("percentTotal").value);
+
+  if (
+    $("percentValue").value === "" ||
+    $("percentTotal").value === "" ||
+    !Number.isFinite(v) ||
+    !Number.isFinite(t) ||
+    t === 0
+  ) {
+    $("percentResult").textContent =
+      "Enter valid numbers. The total cannot be zero.";
+    return;
+  }
+
+  $("percentResult").innerHTML =
+    `<strong>${(v / t * 100).toFixed(2)}%</strong> <span class="muted">(${v} out of ${t})</span>`;
+});
+
+$("addGrade").addEventListener("click", () => {
+  if ($("gradeRows").children.length >= 12) {
+    toast("Maximum 12 subjects.");
+    return;
+  }
+
+  const row = document.createElement("div");
+  row.className = "grade-row";
+
+  row.innerHTML =
+    '<input type="text" placeholder="Subject" aria-label="Subject"><input type="number" min="0" max="100" placeholder="Score %" aria-label="Score percentage">';
+
+  $("gradeRows").append(row);
+});
+
+$("gradeBtn").addEventListener("click", () => {
+  const inputs = [
+    ...$("gradeRows").querySelectorAll('input[type="number"]')
+  ].filter(i => i.value !== "");
+
+  if (
+    !inputs.length ||
+    inputs.some(i => Number(i.value) < 0 || Number(i.value) > 100)
+  ) {
+    $("gradeResult").textContent =
+      "Enter at least one score between 0 and 100.";
+    return;
+  }
+
+  const avg =
+    inputs.reduce((s, i) => s + Number(i.value), 0) / inputs.length;
+
+  $("gradeResult").innerHTML =
+    `Average: <strong>${avg.toFixed(2)}%</strong> <span class="muted">across ${inputs.length} subject${inputs.length === 1 ? "" : "s"}</span>`;
+});
 
 
+// ========================================
 // MULTIPLE EXAM COUNTDOWNS
+// ========================================
 
-// Migrate the old single-exam format, if one exists.
 if (!Array.isArray(data.exams)) {
   data.exams = data.exam
     ? [{
@@ -229,13 +401,11 @@ function formatExamDate(date) {
 }
 
 let editingExamId = null;
+let selectedExamId = null;
 
 function updateExamDateMinimum() {
   $("examDate").min = localDateKey();
 }
-
-
-let selectedExamId = null;
 
 function renderExamCountdown() {
   const today = new Date();
@@ -245,7 +415,6 @@ function renderExamCountdown() {
     exam => exam.id === selectedExamId
   );
 
-  // If the selected exam was deleted, choose the nearest upcoming exam.
   const upcoming = data.exams
     .filter(exam => getExamDate(exam.date) >= today)
     .sort((a, b) => getExamDate(a.date) - getExamDate(b.date));
@@ -254,6 +423,7 @@ function renderExamCountdown() {
 
   if (!displayExam) {
     selectedExamId = null;
+
     $("examNameDisplay").textContent = "No upcoming exams";
     $("daysRemaining").textContent = "—";
     $("countCaption").textContent = "ADD YOUR FIRST EXAM";
@@ -262,13 +432,12 @@ function renderExamCountdown() {
   } else {
     selectedExamId = displayExam.id;
 
-    const difference =
-      getExamDate(displayExam.date) - today;
-
+    const difference = getExamDate(displayExam.date) - today;
     const days = Math.round(difference / 86400000);
 
     $("examNameDisplay").textContent = displayExam.name;
     $("daysRemaining").textContent = days < 0 ? "Passed" : days;
+
     $("countCaption").textContent =
       days < 0 ? "EXAM COMPLETED" :
       days === 0 ? "EXAM DAY" : "DAYS TO GO";
@@ -279,7 +448,6 @@ function renderExamCountdown() {
 
   renderExamList();
 }
-
 
 function renderExamList() {
   const list = $("examList");
@@ -296,6 +464,7 @@ function renderExamList() {
     const bPast = bDate < today;
 
     if (aPast !== bPast) return aPast ? 1 : -1;
+
     return aDate - bDate;
   });
 
@@ -344,9 +513,8 @@ function renderExamList() {
       status.textContent = "Completed";
       status.classList.add("exam-completed");
     } else {
-      status.textContent = remaining === 0
-        ? "Exam day"
-        : `${remaining} days remaining`;
+      status.textContent =
+        remaining === 0 ? "Exam day" : `${remaining} days remaining`;
     }
 
     details.append(name, date, status);
@@ -354,29 +522,29 @@ function renderExamList() {
     const actions = document.createElement("div");
     actions.className = "exam-actions";
 
-   
-const select = document.createElement("button");
-select.className = "secondary-btn";
-select.textContent =
-  selectedExamId === exam.id ? "Selected ✓" : "Select";
-select.type = "button";
+    const select = document.createElement("button");
+    select.className = "secondary-btn";
+    select.textContent =
+      selectedExamId === exam.id ? "Selected ✓" : "Select";
+    select.type = "button";
 
-select.addEventListener("click", () => {
-  selectedExamId = exam.id;
-  renderExamCountdown();
-});
+    select.addEventListener("click", () => {
+      selectedExamId = exam.id;
+      renderExamCountdown();
+    });
 
-const edit = document.createElement("button");
-edit.className = "secondary-btn";
-edit.textContent = "Edit";
-
+    const edit = document.createElement("button");
+    edit.className = "secondary-btn";
+    edit.textContent = "Edit";
     edit.type = "button";
+
     edit.addEventListener("click", () => editExam(exam.id));
 
     const remove = document.createElement("button");
     remove.className = "text-btn danger";
     remove.textContent = "Delete";
     remove.type = "button";
+
     remove.addEventListener("click", () => deleteExam(exam.id));
 
     actions.append(select, edit, remove);
@@ -440,7 +608,10 @@ $("saveExam").addEventListener("click", () => {
     return;
   }
 
-  if (getExamDate(date) < new Date(new Date().setHours(0, 0, 0, 0))) {
+  if (
+    getExamDate(date) <
+    new Date(new Date().setHours(0, 0, 0, 0))
+  ) {
     toast("Please choose today or a future date.");
     return;
   }
@@ -474,22 +645,116 @@ $("cancelExamEdit").addEventListener("click", resetExamForm);
 updateExamDateMinimum();
 renderExamCountdown();
 
-// Refresh countdowns periodically.
 setInterval(renderExamCountdown, 60000);
 
 
-// Flashcards
-let cardIndex=0,flipped=false;
-function renderCards(){const n=data.cards.length;$("cardPosition").textContent=n?`${cardIndex+1} OF ${n}`:"0 CARDS";$("deckCount").textContent=`${n} card${n===1?"":"s"} saved`;if(!n){$("flashLabel").textContent="YOUR QUESTION";$("flashText").textContent="Add your first flashcard to begin.";$("flashHint").textContent="Your cards stay saved on this device.";$("deleteCard").disabled=true;return;}const c=data.cards[cardIndex];$("flashLabel").textContent=flipped?"THE ANSWER":"YOUR QUESTION";$("flashText").textContent=flipped?c.answer:c.question;$("flashHint").textContent="Click the card to "+(flipped?"see the question":"reveal the answer");$("deleteCard").disabled=false;}
-function flip(){if(!data.cards.length)return;flipped=!flipped;renderCards();}
-$("flashcard").addEventListener("click",flip);$("flipCard").addEventListener("click",flip);
-$("addCard").addEventListener("click",()=>{const q=$("newQuestion").value.trim(),a=$("newAnswer").value.trim();if(!q||!a){toast("Add both a question and an answer.");return;}data.cards.push({question:q,answer:a});cardIndex=data.cards.length-1;flipped=false;save();$("newQuestion").value="";$("newAnswer").value="";renderCards();toast("Flashcard added.");});
-$("prevCard").addEventListener("click",()=>{if(!data.cards.length)return;cardIndex=(cardIndex-1+data.cards.length)%data.cards.length;flipped=false;renderCards();});
-$("nextCard").addEventListener("click",()=>{if(!data.cards.length)return;cardIndex=(cardIndex+1)%data.cards.length;flipped=false;renderCards();});
-$("deleteCard").addEventListener("click",()=>{if(!data.cards.length)return;data.cards.splice(cardIndex,1);cardIndex=Math.max(0,cardIndex-1);flipped=false;save();renderCards();toast("Flashcard deleted.");});renderCards();
+// ========================================
+// FLASHCARDS
+// ========================================
+
+let cardIndex = 0;
+let flipped = false;
+
+function renderCards() {
+  const n = data.cards.length;
+
+  $("cardPosition").textContent =
+    n ? `${cardIndex + 1} OF ${n}` : "0 CARDS";
+
+  $("deckCount").textContent =
+    `${n} card${n === 1 ? "" : "s"} saved`;
+
+  if (!n) {
+    $("flashLabel").textContent = "YOUR QUESTION";
+    $("flashText").textContent =
+      "Add your first flashcard to begin.";
+    $("flashHint").textContent =
+      "Your cards stay saved on this device.";
+    $("deleteCard").disabled = true;
+    return;
+  }
+
+  const c = data.cards[cardIndex];
+
+  $("flashLabel").textContent =
+    flipped ? "THE ANSWER" : "YOUR QUESTION";
+
+  $("flashText").textContent =
+    flipped ? c.answer : c.question;
+
+  $("flashHint").textContent =
+    "Click the card to " +
+    (flipped ? "see the question" : "reveal the answer");
+
+  $("deleteCard").disabled = false;
+}
+
+function flip() {
+  if (!data.cards.length) return;
+
+  flipped = !flipped;
+  renderCards();
+}
+
+$("flashcard").addEventListener("click", flip);
+$("flipCard").addEventListener("click", flip);
+
+$("addCard").addEventListener("click", () => {
+  const q = $("newQuestion").value.trim();
+  const a = $("newAnswer").value.trim();
+
+  if (!q || !a) {
+    toast("Add both a question and an answer.");
+    return;
+  }
+
+  data.cards.push({ question: q, answer: a });
+  cardIndex = data.cards.length - 1;
+  flipped = false;
+
+  save();
+
+  $("newQuestion").value = "";
+  $("newAnswer").value = "";
+
+  renderCards();
+  toast("Flashcard added.");
+});
+
+$("prevCard").addEventListener("click", () => {
+  if (!data.cards.length) return;
+
+  cardIndex = (cardIndex - 1 + data.cards.length) % data.cards.length;
+  flipped = false;
+  renderCards();
+});
+
+$("nextCard").addEventListener("click", () => {
+  if (!data.cards.length) return;
+
+  cardIndex = (cardIndex + 1) % data.cards.length;
+  flipped = false;
+  renderCards();
+});
+
+$("deleteCard").addEventListener("click", () => {
+  if (!data.cards.length) return;
+
+  data.cards.splice(cardIndex, 1);
+  cardIndex = Math.max(0, cardIndex - 1);
+  flipped = false;
+
+  save();
+  renderCards();
+  toast("Flashcard deleted.");
+});
+
+renderCards();
 
 
+// ========================================
 // AI-POWERED QUIZ
+// ========================================
 
 const AI_QUIZ_URL =
   "https://studysphere-ai.arnavsingh9011.workers.dev";
@@ -507,9 +772,11 @@ const QUIZ_HISTORY_KEY = "studysphere_quiz_history_v1";
 
 function getQuizHistory() {
   try {
-    return JSON.parse(
+    const history = JSON.parse(
       localStorage.getItem(QUIZ_HISTORY_KEY) || "[]"
     );
+
+    return Array.isArray(history) ? history : [];
   } catch {
     return [];
   }
@@ -583,7 +850,7 @@ $("clearQuizHistory").addEventListener("click", () => {
 renderQuizHistory();
 
 function renderQuiz() {
-  if (quizFinished) return;
+  if (quizFinished || !quizQuestions.length) return;
 
   const q = quizQuestions[quizIndex];
 
@@ -599,16 +866,19 @@ function renderQuiz() {
   q.o.forEach((option, index) => {
     const button = document.createElement("button");
     button.className = "quiz-option";
+
     button.textContent =
       String.fromCharCode(65 + index) + ". " + option;
 
     button.addEventListener("click", () => answerQuiz(index));
+
     $("quizOptions").append(button);
   });
 
   $("quizFeedback").textContent = "";
   $("quizScore").textContent = `Score: ${quizScore}`;
   $("quizNext").disabled = true;
+
   $("quizNext").textContent =
     quizIndex === quizQuestions.length - 1
       ? "Finish quiz"
@@ -628,6 +898,7 @@ function answerQuiz(index) {
     button.disabled = true;
 
     if (i === q.a) button.classList.add("correct");
+
     if (i === index && index !== q.a) {
       button.classList.add("wrong");
     }
@@ -645,11 +916,14 @@ function answerQuiz(index) {
 }
 
 function finishQuiz() {
+  if (quizFinished) return;
+
   quizFinished = true;
   saveQuizHistory();
 
   $("quizProgress").textContent = "COMPLETED";
   $("quizProgressBar").style.width = "100%";
+
   $("quizQuestion").textContent =
     `You scored ${quizScore} out of ${quizQuestions.length}!`;
 
@@ -660,35 +934,12 @@ function finishQuiz() {
       ? "Perfect score! Excellent work."
       : "Nice effort! Keep practising.";
 
-  $("quizNext").textContent = "Play again";
+  $("quizNext").textContent = "Generate another quiz";
   $("quizNext").disabled = false;
 
   data.quizDone = true;
   save();
   updateStreak();
-}
-
-  quizQuestions = Array.from(
-    {length: 5},
-    (_, i) => {
-      const q = questionBank[
-        (day * 3 + i * 2) % questionBank.length
-      ];
-
-      return {...q};
-    }
-  );
-
-  quizIndex = 0;
-  quizScore = 0;
-  quizAnswered = false;
-  quizFinished = false;
-
-  $("quizLabel").textContent = "DAILY CHALLENGE";
-  $("aiQuizStatus").textContent =
-    "Try today's challenge or create your own quiz.";
-
-  renderQuiz();
 }
 
 async function generateAiQuiz() {
@@ -703,8 +954,10 @@ async function generateAiQuiz() {
   }
 
   const button = $("generateAiQuiz");
+
   button.disabled = true;
   button.textContent = "Generating...";
+
   $("aiQuizStatus").textContent =
     "AI is preparing your questions. Please wait...";
 
@@ -727,8 +980,10 @@ async function generateAiQuiz() {
       throw new Error(result.error || "Quiz generation failed.");
     }
 
-    if (!Array.isArray(result.questions) ||
-        result.questions.length !== count) {
+    if (
+      !Array.isArray(result.questions) ||
+      result.questions.length !== count
+    ) {
       throw new Error("The AI returned an invalid quiz.");
     }
 
@@ -738,8 +993,21 @@ async function generateAiQuiz() {
       a: q.correctIndex,
       e: q.explanation
     }));
+
+    if (quizQuestions.some(q =>
+      !q.q ||
+      !Array.isArray(q.o) ||
+      q.o.length !== 4 ||
+      !Number.isInteger(q.a) ||
+      q.a < 0 ||
+      q.a > 3 ||
+      !q.e
+    )) {
+      throw new Error("The AI returned invalid question data.");
+    }
+
     currentQuizTitle = topic;
-currentQuizDifficulty = difficulty;
+    currentQuizDifficulty = difficulty;
 
     quizIndex = 0;
     quizScore = 0;
@@ -748,6 +1016,7 @@ currentQuizDifficulty = difficulty;
 
     $("quizLabel").textContent =
       "AI QUIZ · " + topic.toUpperCase();
+
     $("quizWrap").hidden = false;
 
     $("aiQuizStatus").textContent =
@@ -757,21 +1026,26 @@ currentQuizDifficulty = difficulty;
 
   } catch (error) {
     console.error("AI quiz error:", error);
+
     $("aiQuizStatus").textContent =
       error.message || "Something went wrong. Please try again.";
+
   } finally {
     button.disabled = false;
     button.textContent = "✦ Generate AI quiz";
   }
 }
 
+$("generateAiQuiz").addEventListener("click", generateAiQuiz);
 
 $("quizNext").addEventListener("click", () => {
   if (quizFinished) {
     $("quizWrap").hidden = true;
     $("aiQuizTopic").focus();
+
     $("aiQuizStatus").textContent =
       "Enter a topic to generate another quiz.";
+
     return;
   }
 
